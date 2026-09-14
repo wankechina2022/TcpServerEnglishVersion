@@ -77,14 +77,14 @@ namespace TcpServer.UI.Forms
         {
             if (_currentPort <= 0)
             {
-                MessageHelper.ShowWarning("请先在端口列表中选择一个端口！");
+                MessageHelper.ShowWarning("Please select a port in the port list first!");
                 return;
             }
 
             string text = txtSend.Text;
             if (string.IsNullOrWhiteSpace(text))
             {
-                MessageHelper.ShowWarning("请输入要发送的内容！");
+                MessageHelper.ShowWarning("Please enter the content to send!");
                 txtSend.Focus();
                 return;
             }
@@ -95,7 +95,7 @@ namespace TcpServer.UI.Forms
             {
                 if (!HexHelper.IsHexString(text))
                 {
-                    MessageHelper.ShowWarning("HEX 发送内容格式不正确，请输入如 4F 4B 0D 0A 形式的十六进制！");
+                    MessageHelper.ShowWarning("Invalid HEX format. Please enter hexadecimal such as 4F 4B 0D 0A!");
                     txtSend.Focus();
                     return;
                 }
@@ -109,7 +109,7 @@ namespace TcpServer.UI.Forms
 
             if (data == null || data.Length == 0)
             {
-                MessageHelper.ShowWarning("发送内容为空，请检查输入！");
+                MessageHelper.ShowWarning("Nothing to send. Please check your input!");
                 return;
             }
 
@@ -139,35 +139,35 @@ namespace TcpServer.UI.Forms
                     if (count > 0)
                     {
                         AppendSystemText(_currentPort,
-                            string.Format("已广播给 {0} 个客户端，共 {1} 字节。", count, data.Length));
+                            string.Format("Broadcast to {0} client(s), {1} byte(s) in total.", count, data.Length));
                     }
                     else
                     {
-                        MessageHelper.ShowWarning("广播失败：" + error);
+                        MessageHelper.ShowWarning("Broadcast failed:" + error);
                     }
                 }
                 else
                 {
                     if (string.IsNullOrWhiteSpace(_currentSessionId))
                     {
-                        MessageHelper.ShowWarning("请先选择要发送的客户端！");
+                        MessageHelper.ShowWarning("Please select a client to send to first!");
                         return;
                     }
 
                     if (_serverManager.SendToClient(_currentPort, _currentSessionId, data, out error))
                     {
-                        AppendSystemText(_currentPort, string.Format("已发送 {0} 字节。", data.Length));
+                        AppendSystemText(_currentPort, string.Format("Sent {0} byte(s).", data.Length));
                     }
                     else
                     {
-                        MessageHelper.ShowWarning("发送失败：" + error);
+                        MessageHelper.ShowWarning("Send failed:" + error);
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error("发送数据异常：" + ex.Message, ex);
-                MessageHelper.ShowError("发送失败，详情请查看日志！");
+                _logger.Error("Exception while sending data:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to send. See the log for details!");
             }
             finally
             {
@@ -231,7 +231,7 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Warn("切换当前端口异常：" + ex.Message);
+                _logger.Warn("Exception while switching the current port:" + ex.Message);
             }
         }
 
@@ -294,7 +294,7 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Warn("刷新客户端下拉框异常：" + ex.Message);
+                _logger.Warn("Exception while refreshing the client list:" + ex.Message);
             }
         }
 
@@ -314,8 +314,8 @@ namespace TcpServer.UI.Forms
                 RefreshClientComboBox();
                 RefreshPortGrid();
 
-                string tip = e.IsConnected ? "上线" : "下线";
-                AppendSystemText(e.Port, string.Format("客户端 {0} 已{1}（当前在线 {2} 个）。",
+                string tip = e.IsConnected ? "online" : "offline";
+                AppendSystemText(e.Port, string.Format("Client {0} is now {1} ({2} online).",
                     e.RemoteEndPoint, tip, e.ClientCount));
             });
         }
@@ -369,7 +369,7 @@ namespace TcpServer.UI.Forms
                 content = _serverManager.ReplyEngine.BytesToText(e.Data, e.Length);
             }
 
-            string direction = e.Direction == DataDirection.Received ? "<< 收到" : ">> 发送";
+            string direction = e.Direction == DataDirection.Received ? "<< Received" : ">> Sent";
             string line = string.Format("{0:HH:mm:ss.fff} {1} [{2}] {3}",
                 e.EventTime, direction, e.RemoteEndPoint, content);
 

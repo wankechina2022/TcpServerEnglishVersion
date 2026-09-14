@@ -82,7 +82,7 @@ namespace TcpServer.DAL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("检查配置文件是否存在失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to check whether the config file exists:" + ex.Message, ex);
                 return false;
             }
         }
@@ -99,27 +99,27 @@ namespace TcpServer.DAL
             {
                 if (!Exists())
                 {
-                    LogHelper.Instance.Info("配置文件不存在，将使用默认配置：" + _configFilePath);
+                    LogHelper.Instance.Info("Config file not found, using default config:" + _configFilePath);
                     return CreateDefaultConfig();
                 }
 
                 string json = FileHelper.ReadAllTextSafe(_configFilePath);
                 if (string.IsNullOrWhiteSpace(json))
                 {
-                    LogHelper.Instance.Warn("配置文件内容为空，将使用默认配置：" + _configFilePath);
+                    LogHelper.Instance.Warn("Config file is empty, using default config:" + _configFilePath);
                     return CreateDefaultConfig();
                 }
 
                 config = JsonHelper.Deserialize<AppConfigModel>(json);
                 if (config == null)
                 {
-                    LogHelper.Instance.Warn("配置文件解析失败，将使用默认配置：" + _configFilePath);
+                    LogHelper.Instance.Warn("Failed to parse config file, using default config:" + _configFilePath);
                     return CreateDefaultConfig();
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("读取配置文件异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception while reading the config file:" + ex.Message, ex);
                 return CreateDefaultConfig();
             }
 
@@ -135,7 +135,7 @@ namespace TcpServer.DAL
         {
             if (config == null)
             {
-                LogHelper.Instance.Warn("保存配置失败：配置对象为 null。");
+                LogHelper.Instance.Warn("Failed to save config: the config object is null.");
                 return false;
             }
 
@@ -158,14 +158,14 @@ namespace TcpServer.DAL
                 string json = JsonHelper.Serialize(config);
                 if (string.IsNullOrWhiteSpace(json))
                 {
-                    LogHelper.Instance.Error("保存配置失败：序列化结果为空。");
+                    LogHelper.Instance.Error("Failed to save config: the serialization result is empty.");
                     return false;
                 }
 
                 bool success = FileHelper.WriteAllTextSafe(_configFilePath, json);
                 if (success)
                 {
-                    LogHelper.Instance.Info(string.Format("配置已保存：{0}（端口 {1} 个，规则 {2} 条）",
+                    LogHelper.Instance.Info(string.Format("Config saved: {0} ({1} port(s), {2} rule(s))",
                         _configFilePath,
                         config.Ports == null ? 0 : config.Ports.Count,
                         config.Rules == null ? 0 : config.Rules.Count));
@@ -175,7 +175,7 @@ namespace TcpServer.DAL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("保存配置文件异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception while saving the config file:" + ex.Message, ex);
                 return false;
             }
         }
@@ -197,7 +197,7 @@ namespace TcpServer.DAL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("备份配置文件异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception while backing up the config file:" + ex.Message, ex);
                 return string.Empty;
             }
         }
@@ -272,7 +272,7 @@ namespace TcpServer.DAL
 
                 if (!ValidationHelper.IsValidPort(item.Port))
                 {
-                    LogHelper.Instance.Warn(string.Format("配置文件中存在非法端口项（{0}），已忽略。", item.Port));
+                    LogHelper.Instance.Warn(string.Format("Invalid port entry ({0}) in the config file. Ignored.", item.Port));
                     continue;
                 }
 

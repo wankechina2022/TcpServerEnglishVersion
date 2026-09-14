@@ -62,15 +62,15 @@ namespace TcpServer.Model
                 switch (State)
                 {
                     case PortState.Listening:
-                        return "监听中";
+                        return "Listening";
                     case PortState.Starting:
-                        return "启动中";
+                        return "Starting";
                     case PortState.Stopping:
-                        return "停止中";
+                        return "Stopping";
                     case PortState.Faulted:
-                        return "启动失败";
+                        return "Start Failed";
                     default:
-                        return "已停止";
+                        return "Stopped";
                 }
             }
         }

@@ -41,16 +41,16 @@ namespace TcpServer.UI.Forms
         {
             try
             {
-                lblVersion.Text = string.Format("版本：v{0}", AppConstants.APP_VERSION);
+                lblVersion.Text = string.Format("Version: v{0}", AppConstants.APP_VERSION);
 
                 lblDescription.Text =
-                    "用途：一次性监听多个 TCP 端口，模拟服务端接收设备数据。" + Environment.NewLine +
-                    "特性：端口清单与应答规则自动保存，下次启动无需重新输入。" + Environment.NewLine +
-                    "默认起始端口 " + AppConstants.DEFAULT_START_PORT +
-                    "，默认监听地址 " + AppConstants.DEFAULT_LISTEN_IP + "。";
+                    "Purpose: listen on multiple TCP ports at once and simulate a server receiving device data." + Environment.NewLine +
+                    "Features: the port list and reply rules are saved automatically, so you do not need to re-enter them next time." + Environment.NewLine +
+                    "Default start port " + AppConstants.DEFAULT_START_PORT +
+                    ", default listen address " + AppConstants.DEFAULT_LISTEN_IP + "。";
 
                 lblPaths.Text = string.Format(
-                    "程序目录：{0}{1}配置文件：{2}{1}日志目录：{3}",
+                    "App directory: {0}{1}Config file: {2}{1}Log directory: {3}",
                     AppDomain.CurrentDomain.BaseDirectory,
                     Environment.NewLine,
                     System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
@@ -61,7 +61,7 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("关于窗体初始化失败：" + ex.Message, ex);
+                _logger.Error("About form initialization failed:" + ex.Message, ex);
             }
         }
 

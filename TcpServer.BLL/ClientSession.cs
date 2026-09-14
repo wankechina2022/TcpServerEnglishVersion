@@ -104,8 +104,8 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("端口 {0} 获取客户端地址失败：{1}", LocalPort, ex.Message));
-                RemoteEndPoint = "未知";
+                LogHelper.Instance.Warn(string.Format("Port {0}: failed to get client address: {1}", LocalPort, ex.Message));
+                RemoteEndPoint = "Unknown";
             }
 
             // 2026-09-14 新增：启用 TCP 保活探测，用于自动清理客户端断电/拔线造成的僵尸会话
@@ -140,7 +140,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("端口 {0} 启动接收线程失败：{1}", LocalPort, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Port {0}: failed to start the receive thread: {1}", LocalPort, ex.Message), ex);
                 return false;
             }
         }
@@ -157,13 +157,13 @@ namespace TcpServer.BLL
 
             if (data == null || data.Length == 0)
             {
-                error = "发送内容为空";
+                error = "Nothing to send";
                 return false;
             }
 
             if (!IsConnected)
             {
-                error = "连接已断开";
+                error = "Connection closed";
                 return false;
             }
 
@@ -178,7 +178,7 @@ namespace TcpServer.BLL
                         int sent = _socket.Send(data, totalSent, data.Length - totalSent, SocketFlags.None);
                         if (sent <= 0)
                         {
-                            error = "发送被中断";
+                            error = "Send interrupted";
                             return false;
                         }
 
@@ -196,24 +196,24 @@ namespace TcpServer.BLL
                     // 2026-09-14 新增：区分"发送超时"与普通发送失败，便于现场快速判断原因
                     if (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        error = string.Format("发送超时（{0} 毫秒内未发完，客户端可能连上后未读取数据）",
+                        error = string.Format("Send timed out (not finished within {0} ms; the client may not be reading data)",
                             _socket.SendTimeout);
-                        LogHelper.Instance.Warn(string.Format("端口 {0} 向 {1} 发送超时，已断开该会话：{2}",
+                        LogHelper.Instance.Warn(string.Format("Port {0} -> {1}: send timed out, session closed: {2}",
                             LocalPort, RemoteEndPoint, ex.SocketErrorCode));
                         Close();
                         return false;
                     }
 
-                    error = "发送失败：" + ex.Message;
-                    LogHelper.Instance.Warn(string.Format("端口 {0} 向 {1} 发送失败：{2}",
+                    error = "Send failed:" + ex.Message;
+                    LogHelper.Instance.Warn(string.Format("Port {0} -> {1}: send failed: {2}",
                         LocalPort, RemoteEndPoint, ex.Message));
                     Close();
                     return false;
                 }
                 catch (Exception ex)
                 {
-                    error = "发送异常：" + ex.Message;
-                    LogHelper.Instance.Error(string.Format("端口 {0} 发送数据异常：{1}", LocalPort, ex.Message), ex);
+                    error = "Exception while sending:" + ex.Message;
+                    LogHelper.Instance.Error(string.Format("Port {0}: exception while sending data: {1}", LocalPort, ex.Message), ex);
                     Close();
                     return false;
                 }
@@ -244,7 +244,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("端口 {0} 关闭客户端连接异常：{1}", LocalPort, ex.Message));
+                LogHelper.Instance.Warn(string.Format("Port {0}: exception while closing client connection: {1}", LocalPort, ex.Message));
             }
             finally
             {
@@ -333,7 +333,7 @@ namespace TcpServer.BLL
             {
                 // 保活设置失败不影响正常收发，仅记录告警，避免因个别环境不支持而中断连接建立
                 LogHelper.Instance.Warn(string.Format(
-                    "端口 {0} 客户端 {1} 设置 TCP 保活失败，连接仍可正常使用：{2}",
+                    "Port {0} client {1}: failed to set TCP keep-alive, connection still usable: {2}",
                     LocalPort, RemoteEndPoint, ex.Message));
             }
         }
@@ -366,7 +366,7 @@ namespace TcpServer.BLL
             {
                 // 个别平台/协议栈不支持 NoDelay，不影响收发
                 LogHelper.Instance.Warn(string.Format(
-                    "端口 {0} 客户端 {1} 设置 NoDelay 失败，连接仍可正常使用：{2}",
+                    "Port {0} client {1}: failed to set NoDelay, connection still usable: {2}",
                     LocalPort, RemoteEndPoint, ex.Message));
             }
 
@@ -382,7 +382,7 @@ namespace TcpServer.BLL
             {
                 // 发送超时设置失败不影响正常收发，仅告警
                 LogHelper.Instance.Warn(string.Format(
-                    "端口 {0} 客户端 {1} 设置发送超时失败，连接仍可正常使用：{2}",
+                    "Port {0} client {1}: failed to set send timeout, connection still usable: {2}",
                     LocalPort, RemoteEndPoint, ex.Message));
             }
         }
@@ -406,7 +406,7 @@ namespace TcpServer.BLL
                 {
                     if (!_closed)
                     {
-                        LogHelper.Instance.Info(string.Format("端口 {0} 客户端 {1} 连接中断：{2}",
+                        LogHelper.Instance.Info(string.Format("Port {0} client {1}: connection interrupted: {2}",
                             LocalPort, RemoteEndPoint, ex.SocketErrorCode));
                     }
                     break;
@@ -419,7 +419,7 @@ namespace TcpServer.BLL
                 {
                     if (!_closed)
                     {
-                        LogHelper.Instance.Warn(string.Format("端口 {0} 接收异常：{1}", LocalPort, ex.Message));
+                        LogHelper.Instance.Warn(string.Format("Port {0}: exception while receiving: {1}", LocalPort, ex.Message));
                     }
                     break;
                 }
@@ -449,7 +449,7 @@ namespace TcpServer.BLL
             // 循环退出即视为连接结束
             if (!_closed)
             {
-                LogHelper.Instance.Info(string.Format("端口 {0} 客户端 {1} 已断开连接。", LocalPort, RemoteEndPoint));
+                LogHelper.Instance.Info(string.Format("Port {0}: client {1} disconnected.", LocalPort, RemoteEndPoint));
                 Close();
             }
         }
@@ -471,7 +471,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("接收事件处理异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception in receive event handler:" + ex.Message, ex);
             }
         }
 
@@ -492,7 +492,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("发送事件处理异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception in send event handler:" + ex.Message, ex);
             }
         }
 

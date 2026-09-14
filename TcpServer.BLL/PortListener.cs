@@ -145,7 +145,7 @@ namespace TcpServer.BLL
             _totalBytesSent = 0L;
             _lastActiveTicks = 0L;
             State = PortState.Stopped;
-            StateMessage = "已停止";
+            StateMessage = "Stopped";
         }
 
         #endregion
@@ -184,27 +184,27 @@ namespace TcpServer.BLL
 
             if (_disposed)
             {
-                message = "对象已释放";
+                message = "Object disposed";
                 return false;
             }
 
             // 规约要求：网络设备不允许二次连接
             if (_running)
             {
-                message = "该端口已在监听中";
+                message = "This port is already listening";
                 return false;
             }
 
             if (!ValidationHelper.IsValidPort(Port))
             {
-                message = "端口号非法";
+                message = "Invalid port number";
                 SetState(PortState.Faulted, message);
                 return false;
             }
 
             if (!ValidationHelper.IsValidIpAddress(_listenIp))
             {
-                message = "监听地址非法";
+                message = "Invalid listen address";
                 SetState(PortState.Faulted, message);
                 return false;
             }
@@ -213,13 +213,13 @@ namespace TcpServer.BLL
             // 2026-09-14 修改：按实际要监听的地址探测，避免其它程序只绑某块网卡时误报"已被占用"
             if (!NetHelper.IsPortAvailable(_listenIp, Port))
             {
-                message = "端口已被其他程序占用";
+                message = "Port already in use by another program";
                 SetState(PortState.Faulted, message);
-                LogHelper.Instance.Warn(string.Format("端口 {0} 启动失败：{1}", Port, message));
+                LogHelper.Instance.Warn(string.Format("Port {0} failed to start: {1}", Port, message));
                 return false;
             }
 
-            SetState(PortState.Starting, "正在启动监听");
+            SetState(PortState.Starting, "Starting listener");
 
             try
             {
@@ -237,23 +237,23 @@ namespace TcpServer.BLL
                 // 2026-09-14 新增：启动监听线程看门狗
                 StartWatchdog();
 
-                SetState(PortState.Listening, "监听已启动");
-                LogHelper.Instance.Info(string.Format("端口 {0} 已在 {1} 上启动监听。", Port, _listenIp));
+                SetState(PortState.Listening, "Listening");
+                LogHelper.Instance.Info(string.Format("Port {0} is now listening on {1}.", Port, _listenIp));
                 return true;
             }
             catch (SocketException ex)
             {
-                message = "启动监听失败：" + ex.Message;
+                message = "Failed to start listening:" + ex.Message;
                 SetState(PortState.Faulted, message);
-                LogHelper.Instance.Error(string.Format("端口 {0} 启动监听异常：{1}", Port, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Port {0}: exception while starting listener: {1}", Port, ex.Message), ex);
                 CleanupListener();
                 return false;
             }
             catch (Exception ex)
             {
-                message = "启动监听异常：" + ex.Message;
+                message = "Exception while starting listener:" + ex.Message;
                 SetState(PortState.Faulted, message);
-                LogHelper.Instance.Error(string.Format("端口 {0} 启动监听未知异常：{1}", Port, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Port {0}: unknown exception while starting listener: {1}", Port, ex.Message), ex);
                 CleanupListener();
                 return false;
             }
@@ -275,7 +275,7 @@ namespace TcpServer.BLL
             PortState previousState = State;
             string previousMessage = StateMessage;
 
-            SetState(PortState.Stopping, "正在停止监听");
+            SetState(PortState.Stopping, "Stopping listener");
 
             // 2026-09-14 新增：先停看门狗，避免停止过程中被自动重启
             // 同时递增代数号，让旧看门狗线程醒来后据此判断自己已过期并退出
@@ -303,17 +303,17 @@ namespace TcpServer.BLL
             if (previousState == PortState.Faulted)
             {
                 string message = string.IsNullOrWhiteSpace(previousMessage)
-                    ? "已停止（停止前处于故障状态）"
-                    : string.Format("{0}（已停止）", previousMessage);
+                    ? "Stopped (was in fault state before stopping)"
+                    : string.Format("{0} (stopped)", previousMessage);
 
                 SetState(PortState.Faulted, message);
             }
             else
             {
-                SetState(PortState.Stopped, "已停止");
+                SetState(PortState.Stopped, "Stopped");
             }
 
-            LogHelper.Instance.Info(string.Format("端口 {0} 已停止监听。", Port));
+            LogHelper.Instance.Info(string.Format("Port {0} stopped listening.", Port));
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace TcpServer.BLL
 
             if (string.IsNullOrWhiteSpace(sessionId))
             {
-                error = "未指定客户端";
+                error = "No client specified";
                 return false;
             }
 
@@ -344,7 +344,7 @@ namespace TcpServer.BLL
 
             if (session == null)
             {
-                error = "客户端已断开";
+                error = "Client disconnected";
                 return false;
             }
 
@@ -366,7 +366,7 @@ namespace TcpServer.BLL
 
             if (snapshot.Count == 0)
             {
-                error = "当前没有客户端连接";
+                error = "No client connected";
                 return 0;
             }
 
@@ -443,7 +443,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("端口 {0} 释放时停止监听异常：{1}", Port, ex.Message));
+                LogHelper.Instance.Warn(string.Format("Port {0}: exception while stopping listener on dispose: {1}", Port, ex.Message));
             }
 
             _disposed = true;
@@ -481,7 +481,7 @@ namespace TcpServer.BLL
                     // 2026-09-14 修改：原为 break，会导致监听线程在异常后静默退出——
                     // 界面仍显示"监听中"，但之后所有新连接都接不进来，只能重启程序。
                     // 改为跳过本次异常继续 Accept，保证短连接"断开后下次还能连"。
-                    LogHelper.Instance.Warn(string.Format("端口 {0} 接受连接异常：{1}", Port, ex.Message));
+                    LogHelper.Instance.Warn(string.Format("Port {0}: exception while accepting connection: {1}", Port, ex.Message));
                     SleepAcceptBackoff();
                     continue;
                 }
@@ -502,7 +502,7 @@ namespace TcpServer.BLL
                     }
 
                     // 2026-09-14 修改：同 SocketException，未知异常同样不应终止整个监听循环
-                    LogHelper.Instance.Error(string.Format("端口 {0} 接受连接未知异常：{1}", Port, ex.Message), ex);
+                    LogHelper.Instance.Error(string.Format("Port {0}: unknown exception while accepting connection: {1}", Port, ex.Message), ex);
                     SleepAcceptBackoff();
                     continue;
                 }
@@ -544,7 +544,7 @@ namespace TcpServer.BLL
                 if (ClientCount >= _maxClients)
                 {
                     LogHelper.Instance.Warn(string.Format(
-                        "端口 {0} 客户端数量已达上限 {1}，拒绝新连接。", Port, _maxClients));
+                        "Port {0}: client limit {1} reached, new connection rejected.", Port, _maxClients));
 
                     try { socket.Close(); }
                     catch (Exception) { }
@@ -577,11 +577,11 @@ namespace TcpServer.BLL
                 }
 
                 RaiseClientChanged(session.ToClientInfo(), true);
-                LogHelper.Instance.Info(string.Format("端口 {0} 新客户端接入：{1}", Port, session.RemoteEndPoint));
+                LogHelper.Instance.Info(string.Format("Port {0}: new client connected: {1}", Port, session.RemoteEndPoint));
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("端口 {0} 处理新客户端异常：{1}", Port, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Port {0}: exception while handling new client: {1}", Port, ex.Message), ex);
 
                 try
                 {
@@ -643,7 +643,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("状态变更事件处理异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception in state changed event handler:" + ex.Message, ex);
             }
         }
 
@@ -663,7 +663,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("客户端变更事件处理异常：" + ex.Message, ex);
+                LogHelper.Instance.Error("Exception in client changed event handler:" + ex.Message, ex);
             }
         }
 

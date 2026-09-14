@@ -62,8 +62,8 @@ namespace TcpServer.UI.Forms
                 _isBusy = false;
                 ResetConsoleSelection();
 
-                Text = string.Format("多端口 TCP 监听调试工具  v{0}", AppConstants.APP_VERSION);
-                lblVersion.Text = string.Format("版本 v{0}", AppConstants.APP_VERSION);
+                Text = string.Format("Multi-Port TCP Listener Debugger  v{0}", AppConstants.APP_VERSION);
+                lblVersion.Text = string.Format("Version v{0}", AppConstants.APP_VERSION);
 
                 BindEvents();
                 InitializeListenIpComboBox();
@@ -76,11 +76,11 @@ namespace TcpServer.UI.Forms
 
                 LoadConfigToUi();
 
-                lblConfigPath.Text = "配置文件：" + _configBll.ConfigFilePath;
+                lblConfigPath.Text = "Config file: " + _configBll.ConfigFilePath;
 
                 tmrRefresh.Start();
 
-                _logger.Info("主界面初始化完成。");
+                _logger.Info("Main UI initialized.");
 
                 if (chkAutoStart.Checked)
                 {
@@ -89,8 +89,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Fatal("主界面初始化失败：" + ex.Message, ex);
-                MessageHelper.ShowError("界面初始化失败，详情请查看日志！\n" + ex.Message);
+                _logger.Fatal("Main UI initialization failed:" + ex.Message, ex);
+                MessageHelper.ShowError("UI initialization failed. See the log for details!\n" + ex.Message);
             }
         }
 
@@ -224,7 +224,7 @@ namespace TcpServer.UI.Forms
         /// </summary>
         private void btnOpenLog_Click(object sender, EventArgs e)
         {
-            OpenDirectory(_logger.LogDirectory, "日志目录");
+            OpenDirectory(_logger.LogDirectory, "Log Folder");
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace TcpServer.UI.Forms
 
             if (_serverManager.ListeningCount > 0)
             {
-                MessageHelper.ShowWarning("已有端口处于监听状态，请先停止全部端口再切换监听地址！");
+                MessageHelper.ShowWarning("Some ports are still listening. Stop all ports before changing the listen address!");
                 return;
             }
 
@@ -278,17 +278,17 @@ namespace TcpServer.UI.Forms
         {
             if (_serverManager != null && _serverManager.ListeningCount > 0)
             {
-                MessageHelper.ShowWarning("已有端口处于监听状态，请先停止全部端口再重新加载配置！");
+                MessageHelper.ShowWarning("Some ports are still listening. Stop all ports before reloading the config!");
                 return;
             }
 
-            if (!MessageHelper.ShowConfirm("重新加载将放弃当前未保存的改动，确定继续吗？"))
+            if (!MessageHelper.ShowConfirm("Reloading will discard all unsaved changes. Continue?"))
             {
                 return;
             }
 
             LoadConfigToUi();
-            MessageHelper.ShowSuccess("重新加载配置");
+            MessageHelper.ShowSuccess("Reload Config");
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace TcpServer.UI.Forms
         /// </summary>
         private void mnuOpenConfigDir_Click(object sender, EventArgs e)
         {
-            OpenDirectory(Path.GetDirectoryName(_configBll.ConfigFilePath), "配置目录");
+            OpenDirectory(Path.GetDirectoryName(_configBll.ConfigFilePath), "Config Folder");
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace TcpServer.UI.Forms
                 _config.Rules = dialog.Rules;
                 _serverManager.SetRules(_config.Rules);
                 SaveConfigToFile(false);
-                MessageHelper.ShowSuccess("保存应答规则");
+                MessageHelper.ShowSuccess("Save Reply Rules");
             }
         }
 
@@ -345,8 +345,8 @@ namespace TcpServer.UI.Forms
             int listening = _serverManager == null ? 0 : _serverManager.ListeningCount;
 
             string prompt = listening > 0
-                ? string.Format("当前有 {0} 个端口正在监听，退出将全部断开。确定退出吗？", listening)
-                : "确定要退出程序吗？";
+                ? string.Format("{0} port(s) are listening. Exiting will disconnect all of them. Exit anyway?", listening)
+                : "Are you sure you want to exit?";
 
             if (!MessageHelper.ShowConfirm(prompt))
             {
@@ -358,11 +358,11 @@ namespace TcpServer.UI.Forms
             {
                 tmrRefresh.Stop();
                 SaveConfigToFile(false);
-                _logger.Info("界面关闭，正在停止全部监听端口。");
+                _logger.Info("UI closing, stopping all listening ports.");
             }
             catch (Exception ex)
             {
-                _logger.Warn("窗体关闭时保存配置异常：" + ex.Message);
+                _logger.Warn("Exception while saving the config on form close:" + ex.Message);
             }
             finally
             {
@@ -400,7 +400,7 @@ namespace TcpServer.UI.Forms
             // 已监听的端口需要先停止才能重建清单
             if (_serverManager.ListeningCount > 0)
             {
-                if (!MessageHelper.ShowConfirm("生成新清单需要先停止全部监听端口，确定继续吗？"))
+                if (!MessageHelper.ShowConfirm("Generating a new port list requires stopping all listening ports. Continue?"))
                 {
                     return;
                 }
@@ -417,7 +417,7 @@ namespace TcpServer.UI.Forms
 
             SaveConfigToFile(false);
 
-            MessageHelper.ShowInfo(string.Format("已生成 {0} 个端口：{1} ~ {2}",
+            MessageHelper.ShowInfo(string.Format("Generated {0} port(s): {1} ~ {2}",
                 newPorts.Count, startPort, startPort + newPorts.Count - 1));
         }
 
@@ -433,12 +433,12 @@ namespace TcpServer.UI.Forms
             {
                 if (!silent)
                 {
-                    MessageHelper.ShowWarning("端口清单为空，请先设置起始端口与数量后点击\"生成端口\"！");
+                    MessageHelper.ShowWarning("The port list is empty. Set the start port and count, then click \"Generate Ports\"!");
                 }
                 return;
             }
 
-            if (!silent && !MessageHelper.ShowConfirm("确定要启动全部启用的端口吗？"))
+            if (!silent && !MessageHelper.ShowConfirm("Start all enabled ports?"))
             {
                 return;
             }
@@ -468,8 +468,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("启动全部端口异常：" + ex.Message, ex);
-                MessageHelper.ShowError("启动全部端口失败，详情请查看日志！");
+                _logger.Error("Exception while starting all ports:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to start all ports. See the log for details!");
             }
             finally
             {
@@ -489,12 +489,12 @@ namespace TcpServer.UI.Forms
             int listening = _serverManager.ListeningCount;
             if (listening == 0)
             {
-                MessageHelper.ShowInfo("当前没有端口处于监听状态。");
+                MessageHelper.ShowInfo("No port is currently listening.");
                 return;
             }
 
             if (!MessageHelper.ShowConfirm(string.Format(
-                "确定要停止全部 {0} 个监听端口吗？该操作会断开所有已连接的客户端。", listening)))
+                "Stop all {0} listening port(s)? This will disconnect all connected clients.", listening)))
             {
                 return;
             }
@@ -505,12 +505,12 @@ namespace TcpServer.UI.Forms
             {
                 _serverManager.StopAll();
                 RefreshPortGrid();
-                MessageHelper.ShowSuccess("停止全部端口");
+                MessageHelper.ShowSuccess("Stop All Ports");
             }
             catch (Exception ex)
             {
-                _logger.Error("停止全部端口异常：" + ex.Message, ex);
-                MessageHelper.ShowError("停止全部端口失败，详情请查看日志！");
+                _logger.Error("Exception while stopping all ports:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to stop all ports. See the log for details!");
             }
             finally
             {
@@ -531,14 +531,14 @@ namespace TcpServer.UI.Forms
 
             if (info != null && info.State == PortState.Listening)
             {
-                if (!MessageHelper.ShowConfirm(string.Format("确定要停止端口 {0} 的监听吗？", port)))
+                if (!MessageHelper.ShowConfirm(string.Format("Stop listening on port {0}?", port)))
                 {
                     return;
                 }
 
                 _serverManager.StopPort(port);
                 RefreshPortGrid();
-                MessageHelper.ShowInfo(string.Format("端口 {0} 已停止。", port));
+                MessageHelper.ShowInfo(string.Format("Port {0} stopped.", port));
                 return;
             }
 
@@ -549,11 +549,11 @@ namespace TcpServer.UI.Forms
 
             if (result)
             {
-                MessageHelper.ShowInfo(string.Format("端口 {0} 已启动监听。", port));
+                MessageHelper.ShowInfo(string.Format("Port {0} started listening.", port));
             }
             else
             {
-                MessageHelper.ShowWarning(string.Format("端口 {0} 启动失败：{1}", port, message));
+                MessageHelper.ShowWarning(string.Format("Port {0} failed to start: {1}", port, message));
             }
         }
 
@@ -574,11 +574,11 @@ namespace TcpServer.UI.Forms
                 {
                     if (success)
                     {
-                        MessageHelper.ShowSuccess("保存配置");
+                        MessageHelper.ShowSuccess("Save Config");
                     }
                     else
                     {
-                        MessageHelper.ShowFail("保存配置");
+                        MessageHelper.ShowFail("Save Config");
                     }
                 }
 
@@ -586,11 +586,11 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("保存配置异常：" + ex.Message, ex);
+                _logger.Error("Exception while saving the config:" + ex.Message, ex);
 
                 if (showTip)
                 {
-                    MessageHelper.ShowError("保存配置失败，详情请查看日志！");
+                    MessageHelper.ShowError("Failed to save the config. See the log for details!");
                 }
 
                 return false;
@@ -643,7 +643,7 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Warn("刷新端口表格异常：" + ex.Message);
+                _logger.Warn("Exception while refreshing the port grid:" + ex.Message);
             }
         }
 
@@ -670,11 +670,11 @@ namespace TcpServer.UI.Forms
                     listening = _serverManager.ListeningCount;
                 }
 
-                lblListenStatus.Text = string.Format("监听端口：{0} / {1}", listening, total);
+                lblListenStatus.Text = string.Format("Listening ports: {0} / {1}", listening, total);
             }
             catch (Exception ex)
             {
-                _logger.Warn("刷新状态栏异常：" + ex.Message);
+                _logger.Warn("Exception while refreshing the status bar:" + ex.Message);
             }
         }
 
@@ -715,7 +715,7 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Debug("界面刷新委托执行失败：" + ex.Message);
+                _logger.Debug("UI refresh delegate failed:" + ex.Message);
             }
         }
 
@@ -732,8 +732,8 @@ namespace TcpServer.UI.Forms
                 return;
             }
 
-            _logger.Error(string.Format("打开{0}失败：{1}", name, error));
-            MessageHelper.ShowError(string.Format("打开{0}失败：{1}", name, error));
+            _logger.Error(string.Format("Failed to open {0}: {1}", name, error));
+            MessageHelper.ShowError(string.Format("Failed to open {0}: {1}", name, error));
         }
     }
 }

@@ -42,7 +42,7 @@
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(420, 30);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "多端口 TCP 监听调试工具";
+            this.lblTitle.Text = "Multi-Port TCP Listener Debugger";
             // 
             // lblVersion
             // 
@@ -50,7 +50,7 @@
             this.lblVersion.Name = "lblVersion";
             this.lblVersion.Size = new System.Drawing.Size(420, 20);
             this.lblVersion.TabIndex = 1;
-            this.lblVersion.Text = "版本";
+            this.lblVersion.Text = "Version";
             // 
             // lblDescription
             // 
@@ -58,7 +58,7 @@
             this.lblDescription.Name = "lblDescription";
             this.lblDescription.Size = new System.Drawing.Size(420, 90);
             this.lblDescription.TabIndex = 2;
-            this.lblDescription.Text = "说明";
+            this.lblDescription.Text = "Description";
             // 
             // lblPaths
             // 
@@ -66,7 +66,7 @@
             this.lblPaths.Name = "lblPaths";
             this.lblPaths.Size = new System.Drawing.Size(420, 70);
             this.lblPaths.TabIndex = 3;
-            this.lblPaths.Text = "路径";
+            this.lblPaths.Text = "Paths";
             // 
             // btnClose
             // 
@@ -74,7 +74,7 @@
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(90, 30);
             this.btnClose.TabIndex = 4;
-            this.btnClose.Text = "关闭";
+            this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = true;
             // 
             // frmAbout
@@ -94,7 +94,7 @@
             this.Name = "frmAbout";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "关于";
+            this.Text = "About";
             this.ResumeLayout(false);
         }
 

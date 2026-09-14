@@ -22,7 +22,7 @@ namespace TcpServer.UI
             {
                 if (!instance.IsFirstInstance)
                 {
-                    MessageBox.Show("程序已在运行中，请勿重复启动！", "提示",
+                    MessageBox.Show("The application is already running. Do not start it again!", "Notice",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -43,14 +43,14 @@ namespace TcpServer.UI
                     int cleaned = LogHelper.Instance.CleanExpiredLogs(ConfigHelper.LogKeepMonths);
 
                     LogHelper.Instance.Info(string.Format(
-                        "程序启动，版本 v{0}。启动清理删除 {1} 个超期日志文件；定期清理{2}。",
+                        "Application started, version v{0}. Startup cleanup removed {1} expired log file(s); periodic cleanup {2}.",
                         AppConstants.APP_VERSION,
                         cleaned,
-                        LogHelper.Instance.CleanupRunning ? "已启用" : "未启用"));
+                        LogHelper.Instance.CleanupRunning ? "enabled" : "disabled"));
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Instance.Warn("启动清理日志失败：" + ex.Message);
+                    LogHelper.Instance.Warn("Failed to clean up logs at startup:" + ex.Message);
                 }
 
                 try
@@ -59,13 +59,13 @@ namespace TcpServer.UI
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Instance.Fatal("主窗体运行异常：" + ex.Message, ex);
-                    MessageBox.Show("程序发生严重异常，即将退出。\n错误信息：" + ex.Message,
-                        "严重错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogHelper.Instance.Fatal("Exception in main form:" + ex.Message, ex);
+                    MessageBox.Show("A fatal error occurred. The application will now exit.\nError:" + ex.Message,
+                        "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 finally
                 {
-                    LogHelper.Instance.Info("程序已退出。");
+                    LogHelper.Instance.Info("Application exited.");
                 }
             }
         }
@@ -75,11 +75,11 @@ namespace TcpServer.UI
         /// </summary>
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            string message = e == null || e.Exception == null ? "未知异常" : e.Exception.Message;
-            LogHelper.Instance.Error("UI 线程异常：" + message, e == null ? null : e.Exception);
+            string message = e == null || e.Exception == null ? "Unknown exception" : e.Exception.Message;
+            LogHelper.Instance.Error("UI thread exception:" + message, e == null ? null : e.Exception);
 
-            MessageBox.Show("系统发生异常，请查看日志后重试。\n错误信息：" + message,
-                "系统错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("An error occurred. Please check the log and try again.\nError:" + message,
+                "System Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         /// <summary>
@@ -88,12 +88,12 @@ namespace TcpServer.UI
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = e == null ? null : e.ExceptionObject as Exception;
-            string message = ex == null ? "未知异常" : ex.Message;
+            string message = ex == null ? "Unknown exception" : ex.Message;
 
-            LogHelper.Instance.Fatal("非 UI 线程异常：" + message, ex);
+            LogHelper.Instance.Fatal("Non-UI thread exception:" + message, ex);
 
-            MessageBox.Show("系统发生严重异常，即将退出。\n错误信息：" + message,
-                "严重错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("A fatal system error occurred. The application will now exit.\nError:" + message,
+                "Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

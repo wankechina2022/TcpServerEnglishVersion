@@ -82,63 +82,63 @@
             // colRuleName
             // 
             this.colRuleName.DataPropertyName = "RuleName";
-            this.colRuleName.HeaderText = "规则名称";
+            this.colRuleName.HeaderText = "Rule Name";
             this.colRuleName.Name = "colRuleName";
             this.colRuleName.Width = 130;
             // 
             // colEnabled
             // 
             this.colEnabled.DataPropertyName = "Enabled";
-            this.colEnabled.HeaderText = "启用";
+            this.colEnabled.HeaderText = "Enabled";
             this.colEnabled.Name = "colEnabled";
-            this.colEnabled.Width = 55;
+            this.colEnabled.Width = 70;
             // 
             // colMatchText
             // 
             this.colMatchText.DataPropertyName = "MatchText";
-            this.colMatchText.HeaderText = "匹配内容";
+            this.colMatchText.HeaderText = "Match";
             this.colMatchText.Name = "colMatchText";
             this.colMatchText.Width = 160;
             // 
             // colMatchAsHex
             // 
             this.colMatchAsHex.DataPropertyName = "MatchAsHex";
-            this.colMatchAsHex.HeaderText = "匹配HEX";
+            this.colMatchAsHex.HeaderText = "Match HEX";
             this.colMatchAsHex.Name = "colMatchAsHex";
             this.colMatchAsHex.Width = 80;
             // 
             // colMatchExactly
             // 
             this.colMatchExactly.DataPropertyName = "MatchExactly";
-            this.colMatchExactly.HeaderText = "完全匹配";
+            this.colMatchExactly.HeaderText = "Exact Match";
             this.colMatchExactly.Name = "colMatchExactly";
-            this.colMatchExactly.Width = 80;
+            this.colMatchExactly.Width = 100;
             // 
             // colReplyText
             // 
             this.colReplyText.DataPropertyName = "ReplyText";
-            this.colReplyText.HeaderText = "应答内容";
+            this.colReplyText.HeaderText = "Reply";
             this.colReplyText.Name = "colReplyText";
             this.colReplyText.Width = 160;
             // 
             // colReplyAsHex
             // 
             this.colReplyAsHex.DataPropertyName = "ReplyAsHex";
-            this.colReplyAsHex.HeaderText = "应答HEX";
+            this.colReplyAsHex.HeaderText = "Reply HEX";
             this.colReplyAsHex.Name = "colReplyAsHex";
             this.colReplyAsHex.Width = 80;
             // 
             // colDelayMs
             // 
             this.colDelayMs.DataPropertyName = "DelayMs";
-            this.colDelayMs.HeaderText = "延迟(ms)";
+            this.colDelayMs.HeaderText = "Delay (ms)";
             this.colDelayMs.Name = "colDelayMs";
-            this.colDelayMs.Width = 80;
+            this.colDelayMs.Width = 95;
             // 
             // colOnlyForPort
             // 
             this.colOnlyForPort.DataPropertyName = "OnlyForPort";
-            this.colOnlyForPort.HeaderText = "限定端口";
+            this.colOnlyForPort.HeaderText = "Port Only";
             this.colOnlyForPort.Name = "colOnlyForPort";
             this.colOnlyForPort.Width = 85;
             // 
@@ -159,7 +159,7 @@
             this.lblTip.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
             this.lblTip.Size = new System.Drawing.Size(1000, 34);
             this.lblTip.TabIndex = 0;
-            this.lblTip.Text = "提示：直接在表格中编辑；匹配内容为包含匹配（勾选\"完全匹配\"则要求完全一致）；限定端口填 0 表示对所有端口生效。";
+            this.lblTip.Text = "Tip: edit directly in the grid. Matching is \"contains\" by default (check \"Exact Match\" to require a full match). Set Port Only to 0 to apply to all ports.";
             this.lblTip.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pnlButtons
@@ -182,34 +182,34 @@
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(80, 30);
             this.btnAdd.TabIndex = 0;
-            this.btnAdd.Text = "新增规则";
+            this.btnAdd.Text = "Add Rule";
             this.btnAdd.UseVisualStyleBackColor = true;
             // 
             // btnDelete
             // 
             this.btnDelete.Location = new System.Drawing.Point(100, 10);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(80, 30);
+            this.btnDelete.Size = new System.Drawing.Size(90, 30);
             this.btnDelete.TabIndex = 1;
-            this.btnDelete.Text = "删除规则";
+            this.btnDelete.Text = "Delete Rule";
             this.btnDelete.UseVisualStyleBackColor = true;
             // 
             // btnMoveUp
             // 
-            this.btnMoveUp.Location = new System.Drawing.Point(188, 10);
+            this.btnMoveUp.Location = new System.Drawing.Point(198, 10);
             this.btnMoveUp.Name = "btnMoveUp";
             this.btnMoveUp.Size = new System.Drawing.Size(70, 30);
             this.btnMoveUp.TabIndex = 2;
-            this.btnMoveUp.Text = "上移";
+            this.btnMoveUp.Text = "Move Up";
             this.btnMoveUp.UseVisualStyleBackColor = true;
             // 
             // btnMoveDown
             // 
-            this.btnMoveDown.Location = new System.Drawing.Point(266, 10);
+            this.btnMoveDown.Location = new System.Drawing.Point(276, 10);
             this.btnMoveDown.Name = "btnMoveDown";
-            this.btnMoveDown.Size = new System.Drawing.Size(70, 30);
+            this.btnMoveDown.Size = new System.Drawing.Size(80, 30);
             this.btnMoveDown.TabIndex = 3;
-            this.btnMoveDown.Text = "下移";
+            this.btnMoveDown.Text = "Move Down";
             this.btnMoveDown.UseVisualStyleBackColor = true;
             // 
             // btnOk
@@ -218,7 +218,7 @@
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(84, 30);
             this.btnOk.TabIndex = 4;
-            this.btnOk.Text = "确定";
+            this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
             // 
             // btnCancel
@@ -227,7 +227,7 @@
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(84, 30);
             this.btnCancel.TabIndex = 5;
-            this.btnCancel.Text = "取消";
+            this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
             // frmRuleManager
@@ -245,7 +245,7 @@
             this.Name = "frmRuleManager";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "自动应答规则管理";
+            this.Text = "Auto Reply Rules";
             ((System.ComponentModel.ISupportInitialize)(this.dgvRules)).EndInit();
             this.pnlTip.ResumeLayout(false);
             this.pnlButtons.ResumeLayout(false);

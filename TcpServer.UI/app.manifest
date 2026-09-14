@@ -2,13 +2,14 @@
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
   <assemblyIdentity version="1.0.0.0" name="TcpServer.UI.app" />
 
-  <!-- 2026-09-14 新增：应用程序清单
-       用途：声明以当前用户权限运行 + 兼容 Windows 7~11。
-       说明：本文件当前【不再声明高 DPI 感知】，详见文件末尾的撤销说明。 -->
+  <!-- Added 2026-09-14: application manifest.
+       Purpose: run with the current user's privileges, and declare support for Windows 7 through 11.
+       Note: this file intentionally does NOT declare high-DPI awareness.
+             See the reverting notes at the end of this file. -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- 以当前用户权限运行，不请求提权 -->
+        <!-- Run with the current user's privileges; no elevation is requested -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
@@ -16,7 +17,7 @@
 
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
-      <!-- Windows 10 / 11 -->
+      <!-- Windows 10 / Windows 11 -->
       <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
       <!-- Windows 8.1 -->
       <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
@@ -28,28 +29,35 @@
   </compatibility>
 
   <!-- ============================================================================
-       2026-09-14 撤销：高 DPI 感知声明（dpiAware / dpiAwareness）
+       2026-09-14 REVERTED: high-DPI awareness declaration (dpiAware / dpiAwareness)
 
-       【撤销原因】
-       本机为 150% 缩放（注册表 AppliedDPI = 0x90 = 144）。声明 DPI 感知后出现两个副作用：
-         1) 窗口按 1:1 物理像素渲染，不再被系统位图拉伸 1.5 倍 → 界面整体"变小"；
-         2) WinForms 的 AutoScaleMode=Font 依靠 Font.Height 计算缩放因子，而该值在 .NET
-            中按 96 DPI 固定计算、不随高 DPI 变化 → 缩放因子算成 1.0，控件尺寸未被放大；
-            但 GDI+ 仍按 144 DPI 渲染文字 → 文字撑破按钮/标签（"生成端口"显示成"生成端"、
-            "保存配置"显示成"保存配"）→ 顶部工具栏多处遮挡。
-       现象：界面变小 + 多处遮挡，属功能回归，故整体回退。
+       [Why it was reverted]
+       The development machine runs at 150% scaling (registry AppliedDPI = 0x90 = 144).
+       Declaring DPI awareness produced two side effects:
+         1) The window is rendered at 1:1 physical pixels and is no longer stretched 1.5x
+            by the system bitmap scaler, so the whole UI looks smaller;
+         2) WinForms AutoScaleMode=Font derives its scale factor from Font.Height, which
+            .NET always computes at 96 DPI regardless of the real DPI, so the factor stays
+            1.0 and control sizes are never enlarged, while GDI+ still renders text at
+            144 DPI. Text then overflows buttons and labels ("Generate Ports" was clipped)
+            and several controls on the top toolbar became overlapped.
+       Result: smaller UI plus overlapping controls, i.e. a regression, so it was rolled back.
 
-       【回退方式】
-       注释掉本节点 + App.config 中的 <System.Windows.Forms.ApplicationConfigurationSection>
-       节点即可，其余代码不受影响。恢复系统默认的位图拉伸后，界面尺寸与字号比例恢复正常。
+       [How it was rolled back]
+       Comment out this node, and also comment out the
+       <System.Windows.Forms.ApplicationConfigurationSection> node in App.config.
+       Nothing else is affected. Once the default bitmap stretching is restored,
+       the ratio between window size and font size returns to normal.
 
-       【若将来要重新启用（正确做法）】
-       需两处同时改，缺一不可：
-         1) 恢复本节点；
-         2) App.config 恢复 <System.Windows.Forms.ApplicationConfigurationSection>；
-         3) 同时把三个窗体的 AutoScaleMode 由 Font 改为 Dpi、AutoScaleDimensions 改为 (96F, 96F)，
-            否则仍会因 Font.Height 不随 DPI 变化而漏缩放；
-         4) 改后必须实机验证顶部工具栏（11 个控件共占 1028px）是否被裁。
+       [If it is ever enabled again (the correct way)]
+       All of the following must be changed together; missing any one of them is not enough:
+         1) Restore this node;
+         2) Restore <System.Windows.Forms.ApplicationConfigurationSection> in App.config;
+         3) Change AutoScaleMode from Font to Dpi and AutoScaleDimensions to (96F, 96F)
+            on all three forms, otherwise scaling is still missed because Font.Height
+            does not follow the DPI;
+         4) After the change, verify on a real machine that the top toolbar
+            (11 controls occupying 1028 px in total) is not clipped.
 
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>

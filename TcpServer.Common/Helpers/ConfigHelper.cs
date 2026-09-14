@@ -256,7 +256,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("读取配置项 [{0}] 失败，已使用默认值。原因：{1}", key, ex.Message));
+                LogHelper.Instance.Warn(string.Format("Failed to read config item [{0}], using the default value. Reason: {1}", key, ex.Message));
                 return defaultValue ?? string.Empty;
             }
         }

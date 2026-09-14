@@ -13,7 +13,7 @@ namespace TcpServer.Common.Helpers
         /// <param name="message">提示内容</param>
         public static void ShowInfo(string message)
         {
-            MessageBox.Show(message ?? string.Empty, "提示",
+            MessageBox.Show(message ?? string.Empty, "Notice",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -23,7 +23,7 @@ namespace TcpServer.Common.Helpers
         /// <param name="message">警告内容</param>
         public static void ShowWarning(string message)
         {
-            MessageBox.Show(message ?? string.Empty, "警告",
+            MessageBox.Show(message ?? string.Empty, "Warning",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
@@ -33,7 +33,7 @@ namespace TcpServer.Common.Helpers
         /// <param name="message">错误内容</param>
         public static void ShowError(string message)
         {
-            MessageBox.Show(message ?? string.Empty, "错误",
+            MessageBox.Show(message ?? string.Empty, "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
@@ -44,7 +44,7 @@ namespace TcpServer.Common.Helpers
         /// <returns>用户选择"是"返回 true，否则返回 false</returns>
         public static bool ShowConfirm(string message)
         {
-            return MessageBox.Show(message ?? string.Empty, "确认",
+            return MessageBox.Show(message ?? string.Empty, "Confirm",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
         }
 
@@ -52,18 +52,18 @@ namespace TcpServer.Common.Helpers
         /// 显示操作成功提示
         /// </summary>
         /// <param name="operation">操作名称</param>
-        public static void ShowSuccess(string operation = "操作")
+        public static void ShowSuccess(string operation = "Operation")
         {
-            ShowInfo(string.Format("{0}成功！", operation));
+            ShowInfo(string.Format("{0} succeeded!", operation));
         }
 
         /// <summary>
         /// 显示操作失败提示
         /// </summary>
         /// <param name="operation">操作名称</param>
-        public static void ShowFail(string operation = "操作")
+        public static void ShowFail(string operation = "Operation")
         {
-            ShowError(string.Format("{0}失败，详情请查看日志！", operation));
+            ShowError(string.Format("{0} failed. See the log for details!", operation));
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("TcpServer.BLL")]
-[assembly: AssemblyDescription("TcpServer 多端口监听调试工具 —— 业务逻辑层")]
+[assembly: AssemblyDescription("TcpServer multi-port listener debugger - Business logic layer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TcpServer")]

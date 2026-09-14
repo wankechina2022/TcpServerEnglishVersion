@@ -42,7 +42,7 @@ namespace TcpServer.UI.Helpers
             {
                 if (string.IsNullOrWhiteSpace(path))
                 {
-                    error = "目录路径为空";
+                    error = "Folder path is empty";
                     return false;
                 }
 

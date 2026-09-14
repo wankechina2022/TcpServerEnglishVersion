@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("TcpServer.DAL")]
-[assembly: AssemblyDescription("TcpServer 多端口监听调试工具 —— 数据访问层")]
+[assembly: AssemblyDescription("TcpServer multi-port listener debugger - Data access layer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TcpServer")]

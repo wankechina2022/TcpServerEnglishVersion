@@ -127,31 +127,31 @@
             this.mnuExit});
             this.mnuConfig.Name = "mnuConfig";
             this.mnuConfig.Size = new System.Drawing.Size(62, 21);
-            this.mnuConfig.Text = "配置(&C)";
+            this.mnuConfig.Text = "&Configuration";
             // 
             // mnuSaveConfig
             // 
             this.mnuSaveConfig.Name = "mnuSaveConfig";
             this.mnuSaveConfig.Size = new System.Drawing.Size(180, 22);
-            this.mnuSaveConfig.Text = "保存配置";
+            this.mnuSaveConfig.Text = "Save Config";
             // 
             // mnuReloadConfig
             // 
             this.mnuReloadConfig.Name = "mnuReloadConfig";
             this.mnuReloadConfig.Size = new System.Drawing.Size(180, 22);
-            this.mnuReloadConfig.Text = "重新加载配置";
+            this.mnuReloadConfig.Text = "Reload Config";
             // 
             // mnuOpenConfigDir
             // 
             this.mnuOpenConfigDir.Name = "mnuOpenConfigDir";
             this.mnuOpenConfigDir.Size = new System.Drawing.Size(180, 22);
-            this.mnuOpenConfigDir.Text = "打开配置目录";
+            this.mnuOpenConfigDir.Text = "Open Config Folder";
             // 
             // mnuOpenLogDir
             // 
             this.mnuOpenLogDir.Name = "mnuOpenLogDir";
             this.mnuOpenLogDir.Size = new System.Drawing.Size(180, 22);
-            this.mnuOpenLogDir.Text = "打开日志目录";
+            this.mnuOpenLogDir.Text = "Open Log Folder";
             // 
             // mnuSep1
             // 
@@ -162,7 +162,7 @@
             // 
             this.mnuExit.Name = "mnuExit";
             this.mnuExit.Size = new System.Drawing.Size(180, 22);
-            this.mnuExit.Text = "退出";
+            this.mnuExit.Text = "Exit";
             // 
             // mnuRule
             // 
@@ -170,13 +170,13 @@
             this.mnuManageRule});
             this.mnuRule.Name = "mnuRule";
             this.mnuRule.Size = new System.Drawing.Size(62, 21);
-            this.mnuRule.Text = "规则(&R)";
+            this.mnuRule.Text = "&Rules";
             // 
             // mnuManageRule
             // 
             this.mnuManageRule.Name = "mnuManageRule";
             this.mnuManageRule.Size = new System.Drawing.Size(180, 22);
-            this.mnuManageRule.Text = "应答规则管理";
+            this.mnuManageRule.Text = "Reply Rules...";
             // 
             // mnuHelp
             // 
@@ -184,13 +184,13 @@
             this.mnuAbout});
             this.mnuHelp.Name = "mnuHelp";
             this.mnuHelp.Size = new System.Drawing.Size(62, 21);
-            this.mnuHelp.Text = "帮助(&H)";
+            this.mnuHelp.Text = "&Help";
             // 
             // mnuAbout
             // 
             this.mnuAbout.Name = "mnuAbout";
             this.mnuAbout.Size = new System.Drawing.Size(180, 22);
-            this.mnuAbout.Text = "关于";
+            this.mnuAbout.Text = "About";
             // 
             // pnlTop
             // 
@@ -217,7 +217,7 @@
             this.lblListenIp.Name = "lblListenIp";
             this.lblListenIp.Size = new System.Drawing.Size(62, 16);
             this.lblListenIp.TabIndex = 0;
-            this.lblListenIp.Text = "监听地址";
+            this.lblListenIp.Text = "Listen IP";
             this.lblListenIp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // cboListenIp
@@ -235,7 +235,7 @@
             this.lblStartPort.Name = "lblStartPort";
             this.lblStartPort.Size = new System.Drawing.Size(62, 16);
             this.lblStartPort.TabIndex = 2;
-            this.lblStartPort.Text = "起始端口";
+            this.lblStartPort.Text = "Start Port";
             this.lblStartPort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudStartPort
@@ -255,7 +255,7 @@
             this.lblPortCount.Name = "lblPortCount";
             this.lblPortCount.Size = new System.Drawing.Size(62, 16);
             this.lblPortCount.TabIndex = 4;
-            this.lblPortCount.Text = "端口数量";
+            this.lblPortCount.Text = "Port Count";
             this.lblPortCount.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudPortCount
@@ -275,43 +275,43 @@
             this.chkAutoStart.Name = "chkAutoStart";
             this.chkAutoStart.Size = new System.Drawing.Size(130, 21);
             this.chkAutoStart.TabIndex = 6;
-            this.chkAutoStart.Text = "启动即自动监听";
+            this.chkAutoStart.Text = "Auto-listen on startup";
             this.chkAutoStart.UseVisualStyleBackColor = true;
             // 
             // btnGenerate
             // 
             this.btnGenerate.Location = new System.Drawing.Point(668, 10);
             this.btnGenerate.Name = "btnGenerate";
-            this.btnGenerate.Size = new System.Drawing.Size(84, 29);
+            this.btnGenerate.Size = new System.Drawing.Size(110, 29);
             this.btnGenerate.TabIndex = 7;
-            this.btnGenerate.Text = "生成端口";
+            this.btnGenerate.Text = "Generate Ports";
             this.btnGenerate.UseVisualStyleBackColor = true;
             // 
             // btnStartAll
             // 
-            this.btnStartAll.Location = new System.Drawing.Point(760, 10);
+            this.btnStartAll.Location = new System.Drawing.Point(786, 10);
             this.btnStartAll.Name = "btnStartAll";
             this.btnStartAll.Size = new System.Drawing.Size(84, 29);
             this.btnStartAll.TabIndex = 8;
-            this.btnStartAll.Text = "启动全部";
+            this.btnStartAll.Text = "Start All";
             this.btnStartAll.UseVisualStyleBackColor = true;
             // 
             // btnStopAll
             // 
-            this.btnStopAll.Location = new System.Drawing.Point(852, 10);
+            this.btnStopAll.Location = new System.Drawing.Point(878, 10);
             this.btnStopAll.Name = "btnStopAll";
             this.btnStopAll.Size = new System.Drawing.Size(84, 29);
             this.btnStopAll.TabIndex = 9;
-            this.btnStopAll.Text = "停止全部";
+            this.btnStopAll.Text = "Stop All";
             this.btnStopAll.UseVisualStyleBackColor = true;
             // 
             // btnSaveConfig
             // 
-            this.btnSaveConfig.Location = new System.Drawing.Point(944, 10);
+            this.btnSaveConfig.Location = new System.Drawing.Point(970, 10);
             this.btnSaveConfig.Name = "btnSaveConfig";
-            this.btnSaveConfig.Size = new System.Drawing.Size(84, 29);
+            this.btnSaveConfig.Size = new System.Drawing.Size(92, 29);
             this.btnSaveConfig.TabIndex = 10;
-            this.btnSaveConfig.Text = "保存配置";
+            this.btnSaveConfig.Text = "Save Config";
             this.btnSaveConfig.UseVisualStyleBackColor = true;
             // 
             // pnlGrid
@@ -351,42 +351,42 @@
             // 
             // colPort
             // 
-            this.colPort.HeaderText = "端口";
+            this.colPort.HeaderText = "Port";
             this.colPort.Name = "colPort";
             this.colPort.ReadOnly = true;
             this.colPort.Width = 80;
             // 
             // colState
             // 
-            this.colState.HeaderText = "状态";
+            this.colState.HeaderText = "Status";
             this.colState.Name = "colState";
             this.colState.ReadOnly = true;
             this.colState.Width = 90;
             // 
             // colClients
             // 
-            this.colClients.HeaderText = "客户端数";
+            this.colClients.HeaderText = "Clients";
             this.colClients.Name = "colClients";
             this.colClients.ReadOnly = true;
             this.colClients.Width = 90;
             // 
             // colReceived
             // 
-            this.colReceived.HeaderText = "接收字节";
+            this.colReceived.HeaderText = "Bytes Received";
             this.colReceived.Name = "colReceived";
             this.colReceived.ReadOnly = true;
-            this.colReceived.Width = 110;
+            this.colReceived.Width = 130;
             // 
             // colSent
             // 
-            this.colSent.HeaderText = "发送字节";
+            this.colSent.HeaderText = "Bytes Sent";
             this.colSent.Name = "colSent";
             this.colSent.ReadOnly = true;
             this.colSent.Width = 110;
             // 
             // colLastActive
             // 
-            this.colLastActive.HeaderText = "最后活动";
+            this.colLastActive.HeaderText = "Last Activity";
             this.colLastActive.Name = "colLastActive";
             this.colLastActive.ReadOnly = true;
             this.colLastActive.Width = 150;
@@ -394,7 +394,7 @@
             // colRemark
             // 
             this.colRemark.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colRemark.HeaderText = "备注";
+            this.colRemark.HeaderText = "Remark";
             this.colRemark.MinimumWidth = 120;
             this.colRemark.Name = "colRemark";
             this.colRemark.ReadOnly = true;
@@ -443,7 +443,7 @@
             this.lblSend.Name = "lblSend";
             this.lblSend.Size = new System.Drawing.Size(40, 16);
             this.lblSend.TabIndex = 0;
-            this.lblSend.Text = "发送";
+            this.lblSend.Text = "Send";
             this.lblSend.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtSend
@@ -459,7 +459,7 @@
             this.chkSendHex.Name = "chkSendHex";
             this.chkSendHex.Size = new System.Drawing.Size(90, 21);
             this.chkSendHex.TabIndex = 2;
-            this.chkSendHex.Text = "HEX 发送";
+            this.chkSendHex.Text = "HEX Send";
             this.chkSendHex.UseVisualStyleBackColor = true;
             // 
             // chkSendCrlf
@@ -468,7 +468,7 @@
             this.chkSendCrlf.Name = "chkSendCrlf";
             this.chkSendCrlf.Size = new System.Drawing.Size(135, 21);
             this.chkSendCrlf.TabIndex = 3;
-            this.chkSendCrlf.Text = "追加 0x0D 0x0A";
+            this.chkSendCrlf.Text = "Append CRLF";
             this.chkSendCrlf.UseVisualStyleBackColor = true;
             // 
             // btnSend
@@ -477,7 +477,7 @@
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(76, 28);
             this.btnSend.TabIndex = 4;
-            this.btnSend.Text = "发送";
+            this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
             // 
             // btnSendAll
@@ -486,7 +486,7 @@
             this.btnSendAll.Name = "btnSendAll";
             this.btnSendAll.Size = new System.Drawing.Size(100, 28);
             this.btnSendAll.TabIndex = 5;
-            this.btnSendAll.Text = "广播全部";
+            this.btnSendAll.Text = "Broadcast";
             this.btnSendAll.UseVisualStyleBackColor = true;
             // 
             // pnlDataTool
@@ -508,7 +508,7 @@
             this.lblClient.Name = "lblClient";
             this.lblClient.Size = new System.Drawing.Size(56, 16);
             this.lblClient.TabIndex = 0;
-            this.lblClient.Text = "客户端";
+            this.lblClient.Text = "Client";
             this.lblClient.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // cboClient
@@ -526,7 +526,7 @@
             this.chkHexView.Name = "chkHexView";
             this.chkHexView.Size = new System.Drawing.Size(96, 21);
             this.chkHexView.TabIndex = 2;
-            this.chkHexView.Text = "HEX 显示";
+            this.chkHexView.Text = "HEX Display";
             this.chkHexView.UseVisualStyleBackColor = true;
             // 
             // btnClearData
@@ -535,16 +535,16 @@
             this.btnClearData.Name = "btnClearData";
             this.btnClearData.Size = new System.Drawing.Size(70, 26);
             this.btnClearData.TabIndex = 3;
-            this.btnClearData.Text = "清空";
+            this.btnClearData.Text = "Clear";
             this.btnClearData.UseVisualStyleBackColor = true;
             // 
             // btnOpenLog
             // 
             this.btnOpenLog.Location = new System.Drawing.Point(506, 4);
             this.btnOpenLog.Name = "btnOpenLog";
-            this.btnOpenLog.Size = new System.Drawing.Size(110, 26);
+            this.btnOpenLog.Size = new System.Drawing.Size(120, 26);
             this.btnOpenLog.TabIndex = 4;
-            this.btnOpenLog.Text = "打开日志目录";
+            this.btnOpenLog.Text = "Open Log Folder";
             this.btnOpenLog.UseVisualStyleBackColor = true;
             // 
             // statusStrip
@@ -562,20 +562,20 @@
             // 
             this.lblVersion.Name = "lblVersion";
             this.lblVersion.Size = new System.Drawing.Size(60, 17);
-            this.lblVersion.Text = "版本";
+            this.lblVersion.Text = "Version";
             // 
             // lblListenStatus
             // 
             this.lblListenStatus.Name = "lblListenStatus";
             this.lblListenStatus.Size = new System.Drawing.Size(120, 17);
-            this.lblListenStatus.Text = "监听端口：0 / 0";
+            this.lblListenStatus.Text = "Listening ports: 0 / 0";
             // 
             // lblConfigPath
             // 
             this.lblConfigPath.Name = "lblConfigPath";
             this.lblConfigPath.Size = new System.Drawing.Size(400, 17);
             this.lblConfigPath.Spring = true;
-            this.lblConfigPath.Text = "配置文件";
+            this.lblConfigPath.Text = "Config file";
             this.lblConfigPath.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tmrRefresh
@@ -597,7 +597,7 @@
             this.MinimumSize = new System.Drawing.Size(1000, 600);
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "多端口 TCP 监听调试工具";
+            this.Text = "Multi-Port TCP Listener Debugger";
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.pnlTop.ResumeLayout(false);

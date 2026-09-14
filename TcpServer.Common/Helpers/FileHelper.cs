@@ -34,7 +34,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("创建目录失败：{0}，原因：{1}", directoryPath, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Failed to create directory: {0}, reason: {1}", directoryPath, ex.Message), ex);
                 return false;
             }
         }
@@ -57,7 +57,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("读取文件失败：{0}，原因：{1}", filePath, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Failed to read file: {0}, reason: {1}", filePath, ex.Message), ex);
                 return string.Empty;
             }
         }
@@ -97,7 +97,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("写入文件失败：{0}，原因：{1}", filePath, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Failed to write file: {0}, reason: {1}", filePath, ex.Message), ex);
                 SafeDelete(tempPath);
                 return false;
             }
@@ -126,7 +126,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("删除文件失败：{0}，原因：{1}", filePath, ex.Message));
+                LogHelper.Instance.Warn(string.Format("Failed to delete file: {0}, reason: {1}", filePath, ex.Message));
                 return false;
             }
         }
@@ -175,7 +175,7 @@ namespace TcpServer.Common.Helpers
                 }
 
                 File.Copy(sourcePath, backupPath, false);
-                LogHelper.Instance.Info(string.Format("已备份文件：{0} → {1}", sourcePath, backupPath));
+                LogHelper.Instance.Info(string.Format("File backed up: {0} -> {1}", sourcePath, backupPath));
 
                 // 清理超量历史备份（失败不影响本次备份结果）
                 CleanupExpiredBackups(directory, fileName, extension,
@@ -185,7 +185,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("备份文件失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to back up file:" + ex.Message, ex);
                 return string.Empty;
             }
         }
@@ -257,12 +257,12 @@ namespace TcpServer.Common.Helpers
                 if (deletedCount > 0)
                 {
                     LogHelper.Instance.Info(string.Format(
-                        "已清理 {0} 份超量配置备份，保留最近 {1} 份。", deletedCount, keepCount));
+                        "Cleaned up {0} excess config backup(s), keeping the latest {1}.", deletedCount, keepCount));
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn("清理超量备份文件异常：" + ex.Message);
+                LogHelper.Instance.Warn("Exception while cleaning up excess backup files:" + ex.Message);
             }
 
             return deletedCount;

@@ -55,13 +55,13 @@ namespace TcpServer.Common.Helpers
             catch (UnauthorizedAccessException ex)
             {
                 // 权限异常时不阻断启动，降级为允许运行
-                LogHelper.Instance.Warn("单实例互斥体创建被拒绝，已降级运行：" + ex.Message);
+                LogHelper.Instance.Warn("Single-instance mutex creation was denied, running in degraded mode:" + ex.Message);
                 IsFirstInstance = true;
                 _mutex = null;
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("单实例互斥体创建失败，已降级运行：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to create the single-instance mutex, running in degraded mode:" + ex.Message, ex);
                 IsFirstInstance = true;
                 _mutex = null;
             }

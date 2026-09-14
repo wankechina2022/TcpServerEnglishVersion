@@ -36,7 +36,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("端口 {0} 等待线程 {1} 退出异常：{2}",
+                LogHelper.Instance.Warn(string.Format("Port {0}: exception while waiting for thread {1} to exit: {2}",
                     Port, thread.Name, ex.Message));
             }
         }
@@ -56,7 +56,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("端口 {0} 唤醒看门狗异常：{1}", Port, ex.Message));
+                LogHelper.Instance.Warn(string.Format("Port {0}: exception while waking up the watchdog: {1}", Port, ex.Message));
             }
         }
 
@@ -100,7 +100,7 @@ namespace TcpServer.BLL
             catch (Exception ex)
             {
                 _watchdogRunning = false;
-                LogHelper.Instance.Warn(string.Format("端口 {0} 启动看门狗失败，不影响监听：{1}",
+                LogHelper.Instance.Warn(string.Format("Port {0}: failed to start watchdog, listening not affected: {1}",
                     Port, ex.Message));
             }
         }
@@ -147,7 +147,7 @@ namespace TcpServer.BLL
                 }
 
                 LogHelper.Instance.Warn(string.Format(
-                    "端口 {0} 看门狗检测到监听线程已退出，正在自动恢复监听。", Port));
+                    "Port {0}: watchdog detected that the listener thread exited, restoring listening now.", Port));
 
                 RestartListener(generation);
 
@@ -191,13 +191,13 @@ namespace TcpServer.BLL
                 _acceptThread.Name = string.Format("TcpAccept_{0}", Port);
                 _acceptThread.Start();
 
-                SetState(PortState.Listening, "监听已自动恢复");
-                LogHelper.Instance.Info(string.Format("端口 {0} 监听已由看门狗自动恢复。", Port));
+                SetState(PortState.Listening, "Listening restored automatically");
+                LogHelper.Instance.Info(string.Format("Port {0}: listening restored by the watchdog.", Port));
             }
             catch (Exception ex)
             {
-                SetState(PortState.Faulted, "监听异常且自动恢复失败，请手动重启该端口");
-                LogHelper.Instance.Error(string.Format("端口 {0} 自动恢复监听失败：{1}", Port, ex.Message), ex);
+                SetState(PortState.Faulted, "Listening error and auto-restore failed. Please restart this port manually");
+                LogHelper.Instance.Error(string.Format("Port {0}: failed to restore listening: {1}", Port, ex.Message), ex);
             }
         }
 

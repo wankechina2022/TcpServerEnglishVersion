@@ -192,7 +192,7 @@ namespace TcpServer.Common.Helpers
 
             if (ex != null)
             {
-                logContent += string.Format("\r\n  异常信息：{0}\r\n  堆栈跟踪：{1}",
+                logContent += string.Format("\r\n  Exception: {0}\r\n  Stack trace: {1}",
                     ex.Message, ex.StackTrace);
             }
 
@@ -394,7 +394,7 @@ namespace TcpServer.Common.Helpers
                     catch (Exception ex)
                     {
                         // 单轮清理失败不影响下一轮
-                        Log(LogLevel.WARN, "定期清理日志异常：" + ex.Message);
+                        Log(LogLevel.WARN, "Exception in periodic log cleanup:" + ex.Message);
                     }
                 }
             }
@@ -442,18 +442,18 @@ namespace TcpServer.Common.Helpers
                     catch (Exception ex)
                     {
                         // 单个文件删除失败不中断整体清理
-                        Log(LogLevel.WARN, string.Format("清理历史日志失败：{0}，原因：{1}", file, ex.Message));
+                        Log(LogLevel.WARN, string.Format("Failed to clean up historical log: {0}, reason: {1}", file, ex.Message));
                     }
                 }
 
                 if (deletedCount > 0)
                 {
-                    Log(LogLevel.INFO, string.Format("已清理 {0} 个超过 {1} 个月的历史日志文件。", deletedCount, months));
+                    Log(LogLevel.INFO, string.Format("Cleaned up {0} historical log file(s) older than {1} month(s).", deletedCount, months));
                 }
             }
             catch (Exception ex)
             {
-                Log(LogLevel.WARN, "清理历史日志过程发生异常：" + ex.Message, ex);
+                Log(LogLevel.WARN, "Exception during historical log cleanup:" + ex.Message, ex);
             }
 
             return deletedCount;

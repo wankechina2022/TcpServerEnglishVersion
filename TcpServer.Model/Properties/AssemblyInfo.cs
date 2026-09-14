@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("TcpServer.Model")]
-[assembly: AssemblyDescription("TcpServer 多端口监听调试工具 —— 实体层")]
+[assembly: AssemblyDescription("TcpServer multi-port listener debugger - Entity layer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TcpServer")]

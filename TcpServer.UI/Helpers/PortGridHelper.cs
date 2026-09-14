@@ -57,7 +57,7 @@ namespace TcpServer.UI.Helpers
                 DataGridViewRow row = dgv.Rows[index];
 
                 SetCell(row, COL_PORT, cfg.Port);
-                SetCell(row, COL_STATE, cfg.Enabled ? "已停止" : "已停用");
+                SetCell(row, COL_STATE, cfg.Enabled ? "Stopped" : "Disabled");
                 SetCell(row, COL_CLIENTS, 0);
                 SetCell(row, COL_RECEIVED, "0 B");
                 SetCell(row, COL_SENT, "0 B");

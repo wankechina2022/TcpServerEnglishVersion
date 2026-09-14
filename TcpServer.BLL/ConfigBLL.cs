@@ -71,7 +71,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("加载配置失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to load config:" + ex.Message, ex);
                 return CreateEmptyConfig();
             }
         }
@@ -85,7 +85,7 @@ namespace TcpServer.BLL
         {
             if (config == null)
             {
-                LogHelper.Instance.Warn("保存配置失败：配置对象为 null。");
+                LogHelper.Instance.Warn("Failed to save config: the config object is null.");
                 return false;
             }
 
@@ -95,7 +95,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("保存配置失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to save config:" + ex.Message, ex);
                 return false;
             }
         }
@@ -112,7 +112,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("备份配置失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to back up config:" + ex.Message, ex);
                 return string.Empty;
             }
         }
@@ -133,14 +133,14 @@ namespace TcpServer.BLL
 
             if (!ValidationHelper.IsValidPort(startPort))
             {
-                errorMessage = string.Format("起始端口必须在 {0} ~ {1} 之间",
+                errorMessage = string.Format("Start port must be between {0} and {1}",
                     AppConstants.MIN_PORT, AppConstants.MAX_PORT);
                 return result;
             }
 
             if (!ValidationHelper.IsValidPortCount(count))
             {
-                errorMessage = string.Format("端口数量必须在 {0} ~ {1} 之间",
+                errorMessage = string.Format("Port count must be between {0} and {1}",
                     AppConstants.MIN_PORT_COUNT, AppConstants.MAX_PORT_COUNT);
                 return result;
             }
@@ -148,7 +148,7 @@ namespace TcpServer.BLL
             int endPort = startPort + count - 1;
             if (endPort > AppConstants.MAX_PORT)
             {
-                errorMessage = string.Format("端口区间越界：{0} ~ {1}，请减小数量或起始端口",
+                errorMessage = string.Format("Port range out of bounds: {0} ~ {1}. Reduce the count or the start port",
                     startPort, endPort);
                 return result;
             }

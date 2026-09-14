@@ -74,7 +74,7 @@
         {
             return string.Format("{0} [{1}] {2} -> {3}",
                 RuleName ?? string.Empty,
-                Enabled ? "启用" : "停用",
+                Enabled ? "Enabled" : "Disabled",
                 MatchText ?? string.Empty,
                 ReplyText ?? string.Empty);
         }

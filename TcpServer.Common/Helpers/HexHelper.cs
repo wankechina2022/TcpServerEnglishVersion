@@ -96,7 +96,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn("十六进制文本解析失败：" + ex.Message);
+                LogHelper.Instance.Warn("Failed to parse hexadecimal text:" + ex.Message);
                 return new byte[0];
             }
         }

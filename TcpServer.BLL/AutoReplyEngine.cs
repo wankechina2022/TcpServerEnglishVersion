@@ -62,7 +62,7 @@ namespace TcpServer.BLL
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Instance.Warn("GBK 编码不可用，已降级为 UTF-8：" + ex.Message);
+                    LogHelper.Instance.Warn("GBK encoding unavailable, falling back to UTF-8:" + ex.Message);
                     _encoding = Encoding.UTF8;
                 }
             }
@@ -81,7 +81,7 @@ namespace TcpServer.BLL
             lock (_lockObj)
             {
                 _rules = rules ?? new List<AutoReplyRule>();
-                LogHelper.Instance.Info(string.Format("自动应答规则已更新，共 {0} 条。", _rules.Count));
+                LogHelper.Instance.Info(string.Format("Auto reply rules updated, {0} rule(s) in total.", _rules.Count));
             }
         }
 
@@ -144,7 +144,7 @@ namespace TcpServer.BLL
                 byte[] reply = BuildReplyData(rule);
                 if (reply == null || reply.Length == 0)
                 {
-                    LogHelper.Instance.Warn(string.Format("规则 [{0}] 命中，但应答内容为空，已忽略。",
+                    LogHelper.Instance.Warn(string.Format("Rule [{0}] matched but the reply content is empty. Ignored.",
                         rule.RuleName));
                     continue;
                 }
@@ -175,7 +175,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("文本转字节失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to convert text to bytes:" + ex.Message, ex);
                 return new byte[0];
             }
         }
@@ -200,7 +200,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn("字节转文本失败：" + ex.Message);
+                LogHelper.Instance.Warn("Failed to convert bytes to text:" + ex.Message);
                 return string.Empty;
             }
         }
@@ -230,7 +230,7 @@ namespace TcpServer.BLL
                     byte[] pattern = HexHelper.HexToBytes(rule.MatchText);
                     if (pattern.Length == 0)
                     {
-                        LogHelper.Instance.Warn(string.Format("规则 [{0}] 的十六进制匹配内容非法，已跳过。",
+                        LogHelper.Instance.Warn(string.Format("Rule [{0}] has invalid hexadecimal match content. Skipped.",
                             rule.RuleName));
                         return false;
                     }
@@ -252,7 +252,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("规则 [{0}] 匹配过程异常：{1}", rule.RuleName, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Exception while matching rule [{0}]: {1}", rule.RuleName, ex.Message), ex);
                 return false;
             }
         }

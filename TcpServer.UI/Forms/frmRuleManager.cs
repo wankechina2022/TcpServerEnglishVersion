@@ -80,8 +80,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("应答规则窗体初始化失败：" + ex.Message, ex);
-                MessageHelper.ShowError("应答规则窗体初始化失败，详情请查看日志！");
+                _logger.Error("Reply rules form initialization failed:" + ex.Message, ex);
+                MessageHelper.ShowError("Reply rules form initialization failed. See the log for details!");
             }
         }
 
@@ -112,7 +112,7 @@ namespace TcpServer.UI.Forms
             try
             {
                 AutoReplyRule rule = new AutoReplyRule();
-                rule.RuleName = string.Format("新规则{0}", _ruleList.Count + 1);
+                rule.RuleName = string.Format("New Rule {0}", _ruleList.Count + 1);
 
                 _ruleList.Add(rule);
 
@@ -125,8 +125,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("新增应答规则异常：" + ex.Message, ex);
-                MessageHelper.ShowError("新增规则失败，详情请查看日志！");
+                _logger.Error("Exception while adding the reply rule:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to add the rule. See the log for details!");
             }
         }
 
@@ -139,13 +139,13 @@ namespace TcpServer.UI.Forms
             {
                 if (dgvRules.CurrentRow == null || dgvRules.CurrentRow.Index < 0)
                 {
-                    MessageHelper.ShowWarning("请先选中要删除的规则！");
+                    MessageHelper.ShowWarning("Please select a rule to delete first!");
                     return;
                 }
 
                 int index = dgvRules.CurrentRow.Index;
 
-                if (!MessageHelper.ShowConfirm("确定要删除选中的应答规则吗？"))
+                if (!MessageHelper.ShowConfirm("Delete the selected reply rule?"))
                 {
                     return;
                 }
@@ -159,8 +159,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("删除应答规则异常：" + ex.Message, ex);
-                MessageHelper.ShowError("删除规则失败，详情请查看日志！");
+                _logger.Error("Exception while deleting the reply rule:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to delete the rule. See the log for details!");
             }
         }
 
@@ -203,8 +203,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("保存应答规则异常：" + ex.Message, ex);
-                MessageHelper.ShowError("保存应答规则失败，详情请查看日志！");
+                _logger.Error("Exception while saving the reply rules:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to save the reply rules. See the log for details!");
             }
         }
 
@@ -225,7 +225,7 @@ namespace TcpServer.UI.Forms
             e.ThrowException = false;
             e.Cancel = true;
 
-            _logger.Warn(string.Format("应答规则表格输入数据非法（第 {0} 行第 {1} 列）。",
+            _logger.Warn(string.Format("Invalid input in the reply rules grid (row {0}, column {1}).",
                 e.RowIndex + 1, e.ColumnIndex + 1));
         }
 
@@ -243,7 +243,7 @@ namespace TcpServer.UI.Forms
             {
                 if (dgvRules.CurrentRow == null || dgvRules.CurrentRow.Index < 0)
                 {
-                    MessageHelper.ShowWarning("请先选中要移动的规则！");
+                    MessageHelper.ShowWarning("Please select a rule to move first!");
                     return;
                 }
 
@@ -266,8 +266,8 @@ namespace TcpServer.UI.Forms
             }
             catch (Exception ex)
             {
-                _logger.Error("移动应答规则异常：" + ex.Message, ex);
-                MessageHelper.ShowError("移动规则失败，详情请查看日志！");
+                _logger.Error("Exception while moving the reply rule:" + ex.Message, ex);
+                MessageHelper.ShowError("Failed to move the rule. See the log for details!");
             }
         }
 
@@ -299,37 +299,37 @@ namespace TcpServer.UI.Forms
 
                 if (string.IsNullOrWhiteSpace(rule.MatchText))
                 {
-                    errorMessage = string.Format("第 {0} 行规则已启用，但匹配内容为空！", lineNo);
+                    errorMessage = string.Format("Row {0} is enabled but Match is empty!", lineNo);
                     return false;
                 }
 
                 if (string.IsNullOrWhiteSpace(rule.ReplyText))
                 {
-                    errorMessage = string.Format("第 {0} 行规则已启用，但应答内容为空！", lineNo);
+                    errorMessage = string.Format("Row {0} is enabled but Reply is empty!", lineNo);
                     return false;
                 }
 
                 if (rule.MatchAsHex && !HexHelper.IsHexString(rule.MatchText))
                 {
-                    errorMessage = string.Format("第 {0} 行规则的匹配内容不是合法的十六进制！", lineNo);
+                    errorMessage = string.Format("Row {0}: Match is not valid hexadecimal!", lineNo);
                     return false;
                 }
 
                 if (rule.ReplyAsHex && !HexHelper.IsHexString(rule.ReplyText))
                 {
-                    errorMessage = string.Format("第 {0} 行规则的应答内容不是合法的十六进制！", lineNo);
+                    errorMessage = string.Format("Row {0}: Reply is not valid hexadecimal!", lineNo);
                     return false;
                 }
 
                 if (rule.DelayMs < 0 || rule.DelayMs > 60000)
                 {
-                    errorMessage = string.Format("第 {0} 行规则的延迟必须在 0 ~ 60000 毫秒之间！", lineNo);
+                    errorMessage = string.Format("Row {0}: Delay must be between 0 and 60000 ms!", lineNo);
                     return false;
                 }
 
                 if (rule.OnlyForPort < 0 || rule.OnlyForPort > 65535)
                 {
-                    errorMessage = string.Format("第 {0} 行规则的限定端口必须在 0 ~ 65535 之间！", lineNo);
+                    errorMessage = string.Format("Row {0}: Port Only must be between 0 and 65535!", lineNo);
                     return false;
                 }
             }

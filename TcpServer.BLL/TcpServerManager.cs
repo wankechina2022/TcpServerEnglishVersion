@@ -213,7 +213,7 @@ namespace TcpServer.BLL
 
             if (_disposed)
             {
-                message = "对象已释放";
+                message = "Object disposed";
                 return false;
             }
 
@@ -225,7 +225,7 @@ namespace TcpServer.BLL
 
             if (configs.Count == 0)
             {
-                message = "端口清单为空，请先设置起始端口与数量";
+                message = "The port list is empty. Set the start port and count first";
                 return false;
             }
 
@@ -262,12 +262,12 @@ namespace TcpServer.BLL
                 }
             }
 
-            message = string.Format("启动完成：成功 {0} 个，失败 {1} 个，已在监听跳过 {2} 个。",
+            message = string.Format("Start finished: {0} succeeded, {1} failed, {2} skipped (already listening).",
                 successCount, failCount, skipCount);
 
             if (failDetails.Count > 0)
             {
-                message += " 失败端口：" + string.Join("、", failDetails.ToArray());
+                message += " Failed ports: " + string.Join("、", failDetails.ToArray());
             }
 
             LogHelper.Instance.Info(message);
@@ -291,7 +291,7 @@ namespace TcpServer.BLL
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Instance.Error(string.Format("停止端口 {0} 异常：{1}", listener.Port, ex.Message), ex);
+                    LogHelper.Instance.Error(string.Format("Exception while stopping port {0}: {1}", listener.Port, ex.Message), ex);
                 }
             }
         }
@@ -331,7 +331,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error(string.Format("停止端口 {0} 异常：{1}", port, ex.Message), ex);
+                LogHelper.Instance.Error(string.Format("Exception while stopping port {0}: {1}", port, ex.Message), ex);
             }
         }
 
@@ -354,7 +354,7 @@ namespace TcpServer.BLL
             PortListener listener = FindListener(port);
             if (listener == null || !listener.IsListening)
             {
-                error = "该端口未在监听";
+                error = "This port is not listening";
                 return false;
             }
 
@@ -375,7 +375,7 @@ namespace TcpServer.BLL
             PortListener listener = FindListener(port);
             if (listener == null || !listener.IsListening)
             {
-                error = "该端口未在监听";
+                error = "This port is not listening";
                 return 0;
             }
 
@@ -428,7 +428,7 @@ namespace TcpServer.BLL
                 empty.Enabled = enabled;
                 empty.Remark = remark;
                 empty.State = PortState.Stopped;
-                empty.Message = "已停止";
+                empty.Message = "Stopped";
                 return empty;
             }
 
@@ -471,7 +471,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn("释放管理器时停止全部端口异常：" + ex.Message);
+                LogHelper.Instance.Warn("Exception while stopping all ports on dispose:" + ex.Message);
             }
 
             List<PortListener> snapshot = GetListenerSnapshot();
@@ -592,7 +592,7 @@ namespace TcpServer.BLL
             if (handler == null || e == null) { return; }
 
             try { handler(this, e); }
-            catch (Exception ex) { LogHelper.Instance.Error("端口状态事件转发异常：" + ex.Message, ex); }
+            catch (Exception ex) { LogHelper.Instance.Error("Exception while forwarding port state event:" + ex.Message, ex); }
         }
 
         /// <summary>
@@ -604,7 +604,7 @@ namespace TcpServer.BLL
             if (handler == null || e == null) { return; }
 
             try { handler(this, e); }
-            catch (Exception ex) { LogHelper.Instance.Error("客户端事件转发异常：" + ex.Message, ex); }
+            catch (Exception ex) { LogHelper.Instance.Error("Exception while forwarding client event:" + ex.Message, ex); }
         }
 
         /// <summary>
@@ -618,7 +618,7 @@ namespace TcpServer.BLL
             if (handler != null)
             {
                 try { handler(this, e); }
-                catch (Exception ex) { LogHelper.Instance.Error("数据事件转发异常：" + ex.Message, ex); }
+                catch (Exception ex) { LogHelper.Instance.Error("Exception while forwarding data event:" + ex.Message, ex); }
             }
 
             TryAutoReply(e);
@@ -635,7 +635,7 @@ namespace TcpServer.BLL
             if (handler != null)
             {
                 try { handler(this, e); }
-                catch (Exception ex) { LogHelper.Instance.Error("发送事件转发异常：" + ex.Message, ex); }
+                catch (Exception ex) { LogHelper.Instance.Error("Exception while forwarding send event:" + ex.Message, ex); }
             }
         }
 
@@ -678,17 +678,17 @@ namespace TcpServer.BLL
                     if (SendToClient(port, sessionId, replyData, out error))
                     {
                         LogHelper.Instance.Info(string.Format(
-                            "端口 {0} 按规则 [{1}] 自动应答 {2} 字节。", port, ruleName, replyData.Length));
+                            "Port {0} auto-replied {2} byte(s) by rule [{1}].", port, ruleName, replyData.Length));
                     }
                     else
                     {
                         LogHelper.Instance.Warn(string.Format(
-                            "端口 {0} 自动应答失败：{1}", port, error));
+                            "Port {0}: auto reply failed: {1}", port, error));
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Instance.Error("自动应答线程异常：" + ex.Message, ex);
+                    LogHelper.Instance.Error("Exception in auto reply thread:" + ex.Message, ex);
                 }
             });
         }

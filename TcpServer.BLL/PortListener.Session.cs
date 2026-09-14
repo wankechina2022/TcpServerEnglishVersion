@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
@@ -36,7 +36,7 @@ namespace TcpServer.BLL
             if (handler != null)
             {
                 try { handler(this, e); }
-                catch (Exception ex) { LogHelper.Instance.Error("数据接收事件处理异常：" + ex.Message, ex); }
+                catch (Exception ex) { LogHelper.Instance.Error("Exception in data received event handler:" + ex.Message, ex); }
             }
         }
 
@@ -58,7 +58,7 @@ namespace TcpServer.BLL
             if (handler != null)
             {
                 try { handler(this, e); }
-                catch (Exception ex) { LogHelper.Instance.Error("数据发送事件处理异常：" + ex.Message, ex); }
+                catch (Exception ex) { LogHelper.Instance.Error("Exception in data sent event handler:" + ex.Message, ex); }
             }
         }
 

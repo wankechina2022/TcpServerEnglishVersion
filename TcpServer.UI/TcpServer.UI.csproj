@@ -12,7 +12,10 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <!-- 2026-09-14 新增：引用应用程序清单，声明高 DPI 感知，解决高分屏界面模糊 -->
+    <!-- Added 2026-09-14: reference the application manifest (run as current user,
+         Windows 7 to 11 compatibility). The high-DPI awareness declaration that used to
+         live in that manifest was REVERTED on 2026-09-14 because it shrank the UI and
+         overlapped controls at 150% scaling; see app.manifest for details. -->
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

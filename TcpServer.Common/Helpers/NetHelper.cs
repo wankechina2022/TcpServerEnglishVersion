@@ -36,7 +36,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("枚举本机监听地址失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to enumerate local listen addresses:" + ex.Message, ex);
             }
 
             // 兜底：即使网络枚举异常，也保证至少有回环地址可选
@@ -96,7 +96,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("枚举本机网卡地址失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to enumerate local network adapter addresses:" + ex.Message, ex);
             }
 
             return list;
@@ -160,13 +160,13 @@ namespace TcpServer.Common.Helpers
                     return true;
                 }
 
-                LogHelper.Instance.Warn(string.Format("探测端口 {0}（{1}）是否可用时发生套接字异常：{2}",
+                LogHelper.Instance.Warn(string.Format("Socket exception while probing whether port {0} ({1}) is available: {2}",
                     port, address, ex.SocketErrorCode));
                 return false;
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Warn(string.Format("探测端口 {0} 是否可用时发生异常：{1}", port, ex.Message));
+                LogHelper.Instance.Warn(string.Format("Exception while probing whether port {0} is available: {1}", port, ex.Message));
                 return false;
             }
             finally

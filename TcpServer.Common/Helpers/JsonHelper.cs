@@ -40,7 +40,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("对象序列化为 JSON 失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to serialize object to JSON:" + ex.Message, ex);
                 return string.Empty;
             }
         }
@@ -86,7 +86,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.Instance.Error("JSON 反序列化失败：" + ex.Message, ex);
+                LogHelper.Instance.Error("Failed to deserialize JSON:" + ex.Message, ex);
                 result = null;
                 return false;
             }

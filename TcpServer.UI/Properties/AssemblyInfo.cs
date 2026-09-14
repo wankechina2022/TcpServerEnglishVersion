@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("多端口 TCP 监听调试工具")]
-[assembly: AssemblyDescription("TcpServer 多端口监听调试工具 —— 表示层")]
+[assembly: AssemblyTitle("Multi-Port TCP Listener Debugger")]
+[assembly: AssemblyDescription("TcpServer multi-port listener debugger - Presentation layer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TcpServer")]
