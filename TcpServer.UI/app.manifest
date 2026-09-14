@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+  <assemblyIdentity version="1.0.0.0" name="TcpServer.UI.app" />
+
+  <!-- 2026-09-14 新增：应用程序清单
+       用途：声明以当前用户权限运行 + 兼容 Windows 7~11。
+       说明：本文件当前【不再声明高 DPI 感知】，详见文件末尾的撤销说明。 -->
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!-- 以当前用户权限运行，不请求提权 -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 / 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+      <!-- Windows 8.1 -->
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+      <!-- Windows 8 -->
+      <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+      <!-- Windows 7 -->
+      <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />
+    </application>
+  </compatibility>
+
+  <!-- ============================================================================
+       2026-09-14 撤销：高 DPI 感知声明（dpiAware / dpiAwareness）
+
+       【撤销原因】
+       本机为 150% 缩放（注册表 AppliedDPI = 0x90 = 144）。声明 DPI 感知后出现两个副作用：
+         1) 窗口按 1:1 物理像素渲染，不再被系统位图拉伸 1.5 倍 → 界面整体"变小"；
+         2) WinForms 的 AutoScaleMode=Font 依靠 Font.Height 计算缩放因子，而该值在 .NET
+            中按 96 DPI 固定计算、不随高 DPI 变化 → 缩放因子算成 1.0，控件尺寸未被放大；
+            但 GDI+ 仍按 144 DPI 渲染文字 → 文字撑破按钮/标签（"生成端口"显示成"生成端"、
+            "保存配置"显示成"保存配"）→ 顶部工具栏多处遮挡。
+       现象：界面变小 + 多处遮挡，属功能回归，故整体回退。
+
+       【回退方式】
+       注释掉本节点 + App.config 中的 <System.Windows.Forms.ApplicationConfigurationSection>
+       节点即可，其余代码不受影响。恢复系统默认的位图拉伸后，界面尺寸与字号比例恢复正常。
+
+       【若将来要重新启用（正确做法）】
+       需两处同时改，缺一不可：
+         1) 恢复本节点；
+         2) App.config 恢复 <System.Windows.Forms.ApplicationConfigurationSection>；
+         3) 同时把三个窗体的 AutoScaleMode 由 Font 改为 Dpi、AutoScaleDimensions 改为 (96F, 96F)，
+            否则仍会因 Font.Height 不随 DPI 变化而漏缩放；
+         4) 改后必须实机验证顶部工具栏（11 个控件共占 1028px）是否被裁。
+
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, PerMonitor</dpiAwareness>
+    </windowsSettings>
+  </application>
+       ============================================================================ -->
+</assembly>

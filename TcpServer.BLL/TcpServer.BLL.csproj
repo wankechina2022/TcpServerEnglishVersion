@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{513FD418-142B-4046-A12E-21C112F8DEDA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TcpServer.BLL</RootNamespace>
+    <AssemblyName>TcpServer.BLL</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoReplyEngine.cs" />
+    <Compile Include="ClientChangedEventArgs.cs" />
+    <Compile Include="ClientSession.cs" />
+    <Compile Include="ConfigBLL.cs" />
+    <Compile Include="PortDataEventArgs.cs" />
+    <Compile Include="PortListener.cs" />
+    <Compile Include="PortListener.Session.cs">
+      <DependentUpon>PortListener.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PortListener.Watchdog.cs">
+      <DependentUpon>PortListener.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PortStateChangedEventArgs.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TcpServerManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TcpServer.Common\TcpServer.Common.csproj">
+      <Project>{F80E2ABA-66F3-4CAE-A0F1-5D4089FED098}</Project>
+      <Name>TcpServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TcpServer.DAL\TcpServer.DAL.csproj">
+      <Project>{47BF1E6E-48C0-427B-AF77-CBE32A0DB03E}</Project>
+      <Name>TcpServer.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TcpServer.Model\TcpServer.Model.csproj">
+      <Project>{B5F6EE4A-FF73-4EFF-BF1A-FE33C527AAF2}</Project>
+      <Name>TcpServer.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
