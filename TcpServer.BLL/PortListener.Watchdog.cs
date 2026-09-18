@@ -9,20 +9,21 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 端口监听服务（看门狗与线程收尾部分）
-    /// 2026-09-14 拆分：PortListener 主体加入看门狗后超过规约"单类不超 800 行"的红线，
-    /// 按项目既有惯例（参见 frmMain.cs / frmMain.Console.cs）拆到本 partial 文件。
-    /// 端口启停、客户端接入与收发相关成员见 PortListener.cs
+    /// Port listening service (watchdog and thread finalization part).
+    /// 2026-09-14 split: with the watchdog added, the main PortListener body exceeded the convention red
+    /// line of "a single class must not exceed 800 lines", so it was split into this partial file following
+    /// the project's existing practice (see frmMain.cs / frmMain.Console.cs).
+    /// Port start / stop, client admission and send / receive members live in PortListener.cs.
     /// </summary>
     public partial class PortListener
     {
-        #region 私有方法 —— 线程收尾
+        #region Private Methods - Thread Finalization
 
         /// <summary>
-        /// 等待线程退出（2026-09-14 新增，统一异常与超时处理）
+        /// Waits for a thread to exit (added 2026-09-14, unified exception and timeout handling).
         /// </summary>
-        /// <param name="thread">目标线程，可为 null</param>
-        /// <param name="timeoutMs">最长等待毫秒数</param>
+        /// <param name="thread">Target thread; may be null.</param>
+        /// <param name="timeoutMs">Maximum wait in milliseconds.</param>
         private void JoinThread(Thread thread, int timeoutMs)
         {
             if (thread == null) { return; }
@@ -42,11 +43,11 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 唤醒看门狗线程（2026-09-14 新增）
-        /// 用途：Stop 时无需等满巡检间隔（默认 5 秒），立即让看门狗退出，
-        ///       把"每停止一个端口白等 1 秒"降到毫秒级。
-        /// 说明：异常一律吞掉——即使信号对象已被释放，停止流程也必须继续走完，
-        ///       否则端口会停不干净。
+        /// Wakes the watchdog thread (added 2026-09-14).
+        /// Purpose: on Stop there is no need to wait out a full inspection interval (5 seconds by default);
+        ///          the watchdog exits immediately, reducing "waste 1 second per port stopped" to milliseconds.
+        /// Note: all exceptions are swallowed - even if the signal object has been disposed, the stop flow
+        ///       must still run to completion, otherwise the port cannot be stopped cleanly.
         /// </summary>
         private void WakeupWatchdog()
         {
@@ -62,21 +63,24 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 私有方法 —— 监听看门狗
+        #region Private Methods - Listener Watchdog
 
         /// <summary>
-        /// 启动监听线程看门狗（2026-09-14 新增）
-        /// 用途：Accept 循环虽已改为遇异常继续，但若线程因其它未预期原因（如线程被强制终止）
-        ///       退出，界面仍会显示"监听中"而实际再也接不进连接，只能重启程序。
-        ///       看门狗定期巡检，发现线程已死即自动重建监听，把"必须重启程序"变成自愈。
-        /// 说明：每次启动都递增代数号并传入巡检循环，旧线程醒来后据此判断自己已过期并退出，
-        ///       避免"停止后立刻再启动"时出现两条看门狗并存。
+        /// Starts the listener-thread watchdog (added 2026-09-14).
+        /// Purpose: although the Accept loop was changed to continue after an exception, if the thread exits
+        ///          for another unexpected reason (for example being terminated forcibly), the UI would still
+        ///          show "Listening" while no connection could ever get in again, leaving a program restart as
+        ///          the only fix. The watchdog inspects periodically and rebuilds the listener automatically
+        ///          once the thread is found dead, turning "must restart the program" into self-healing.
+        /// Note: every start increments the generation counter and passes it into the inspection loop, so an
+        ///       old thread sees on waking that it is superseded and exits, avoiding two watchdogs coexisting
+        ///       when a stop is immediately followed by a start.
         /// </summary>
         private void StartWatchdog()
         {
             int intervalMs = ConfigHelper.WatchdogIntervalMs;
 
-            // 配置为 0 表示关闭看门狗
+            // A configured value of 0 disables the watchdog.
             if (intervalMs <= 0)
             {
                 return;
@@ -86,8 +90,8 @@ namespace TcpServer.BLL
             {
                 int generation = Interlocked.Increment(ref _watchdogGeneration);
 
-                // 2026-09-14 新增：先清掉上一次停止时留下的唤醒信号，
-                // 否则新看门狗线程一启动就会立刻被"唤醒"而直接退出
+                // Added 2026-09-14: clear the wake-up signal left by the previous stop first, otherwise the
+                // new watchdog thread would be "woken" the moment it starts and exit immediately.
                 _watchdogWakeup.Reset();
 
                 _watchdogRunning = true;
@@ -106,9 +110,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 看门狗巡检循环（2026-09-14 新增）
+        /// Watchdog inspection loop (added 2026-09-14).
         /// </summary>
-        /// <param name="generation">本线程的代数号，与当前代数不一致即表示已被替换，需退出</param>
+        /// <param name="generation">This thread's generation number; a mismatch with the current generation means
+        ///                         it has been superseded and must exit.</param>
         private void WatchdogLoop(int generation)
         {
             int intervalMs = ConfigHelper.WatchdogIntervalMs;
@@ -118,8 +123,9 @@ namespace TcpServer.BLL
             {
                 bool wokenUp = false;
 
-                // 2026-09-14 修改：原为 Thread.Sleep(intervalMs)，Stop 时 Join 只能等满超时返回，
-                // 实测每个端口白等约 1 秒。改为可唤醒等待：Stop 里 Set 后立即返回 true。
+                // 2026-09-14 change: this was Thread.Sleep(intervalMs), so on Stop the Join could only
+                // return after the full timeout (measured as roughly 1 wasted second per port).
+                // It is now an interruptible wait: Set inside Stop makes it return true immediately.
                 try
                 {
                     wokenUp = _watchdogWakeup.Wait(intervalMs);
@@ -128,7 +134,8 @@ namespace TcpServer.BLL
                 {
                 }
 
-                // 收到停止唤醒信号，或代数已变（被停止 / 重启过）—— 本线程作废，直接退出
+                // A stop wake-up was received, or the generation changed (stopped / restarted) - this thread
+                // is void and exits at once.
                 if (wokenUp || generation != Volatile.Read(ref _watchdogGeneration))
                 {
                     break;
@@ -139,7 +146,7 @@ namespace TcpServer.BLL
                     continue;
                 }
 
-                // 监听中但 Accept 线程已不在 —— 说明监听已失效，需要重建
+                // Listening but the Accept thread is gone - listening has failed and needs rebuilding.
                 Thread acceptThread = _acceptThread;
                 if (acceptThread != null && acceptThread.IsAlive)
                 {
@@ -151,23 +158,25 @@ namespace TcpServer.BLL
 
                 RestartListener(generation);
 
-                // 重建后本线程继续巡检即可；若期间被停止/重启，下一轮代数校验会退出
+                // After the rebuild this thread simply keeps inspecting; if it was stopped / restarted in the
+                // meantime, the next generation check makes it exit.
             }
         }
 
         /// <summary>
-        /// 重建监听（看门狗调用，2026-09-14 新增）
+        /// Rebuilds the listener (called by the watchdog, added 2026-09-14).
         /// </summary>
-        /// <param name="generation">调用方代数号，与当前代数不一致则放弃重建</param>
+        /// <param name="generation">Caller generation number; the rebuild is abandoned on a mismatch with the
+        ///                         current generation.</param>
         private void RestartListener(int generation)
         {
             try
             {
-                // 先释放旧监听器，再重新绑定，避免"已被自己占用"的假故障
+                // Release the old listener first and then rebind, avoiding a false fault of "occupied by itself".
                 CleanupListener();
 
-                // 停止/重启动作会改变代数号；此处再校验一次，
-                // 避免在"已停止"或"已由新看门狗接管"的情况下重复创建监听
+                // Stop / restart actions change the generation number; verify once more here to avoid creating
+                // a duplicate listener when already stopped or already taken over by a new watchdog.
                 if (generation != Volatile.Read(ref _watchdogGeneration)
                     || !_watchdogRunning || !_running || _disposed)
                 {
@@ -178,7 +187,8 @@ namespace TcpServer.BLL
                 _listener = new TcpListener(address, Port);
                 _listener.Start();
 
-                // 绑定成功后再校验一次：若这期间被停止，立刻回收刚创建的句柄
+                // Verify once more after a successful bind: if it was stopped during that window, reclaim the
+                // handle that was just created.
                 if (generation != Volatile.Read(ref _watchdogGeneration)
                     || !_watchdogRunning || !_running || _disposed)
                 {

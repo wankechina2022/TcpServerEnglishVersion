@@ -9,30 +9,30 @@ using TcpServer.UI.Helpers;
 namespace TcpServer.UI.Forms
 {
     /// <summary>
-    /// 主窗体（数据控制台部分）—— 客户端选择、收发数据展示与手动发送
-    /// 端口管理与启停控制相关成员见 frmMain.cs
+    /// Main window (data console part) - client selection, send / receive data display and manual sending.
+    /// Port management and start / stop control members live in frmMain.cs.
     /// </summary>
     public partial class frmMain
     {
         // ============================================================
-        // 1. 私有字段
+        // 1. Private fields
         // ============================================================
 
-        /// <summary>当前界面选中的端口号</summary>
+        /// <summary>Port number currently selected in the UI.</summary>
         private int _currentPort;
 
-        /// <summary>当前界面选中的会话标识</summary>
+        /// <summary>Session identifier currently selected in the UI.</summary>
         private string _currentSessionId;
 
-        /// <summary>数据区最大保留行数</summary>
+        /// <summary>Maximum number of lines retained in the data area.</summary>
         private const int MAX_DATA_LINES = 2000;
 
         // ============================================================
-        // 2. 事件处理
+        // 2. Event handlers
         // ============================================================
 
         /// <summary>
-        /// 客户端下拉框变化
+        /// Client drop-down selection changed.
         /// </summary>
         private void cboClient_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -41,7 +41,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 发送数据给选中客户端
+        /// Sends data to the selected client.
         /// </summary>
         private void btnSend_Click(object sender, EventArgs e)
         {
@@ -49,7 +49,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 广播数据给该端口全部客户端
+        /// Broadcasts data to all clients on this port.
         /// </summary>
         private void btnSendAll_Click(object sender, EventArgs e)
         {
@@ -57,7 +57,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 清空数据区
+        /// Clears the data area.
         /// </summary>
         private void btnClearData_Click(object sender, EventArgs e)
         {
@@ -65,14 +65,15 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 3. 私有业务方法
+        // 3. Private business methods
         // ============================================================
 
         /// <summary>
-        /// 发送数据 —— 说明：本工具为模拟服务端，发送仅回给调试对端，
-        /// 属高频调试交互，故按规约"敏感操作确认"精神做了可操作性取舍，不逐次弹窗。
+        /// Sends data - note: this tool emulates a server, so sending only replies to the debugging peer.
+        /// That is high-frequency debugging interaction, so following the spirit of the convention's
+        /// "confirm sensitive operations" a usability trade-off is made and no dialog is shown each time.
         /// </summary>
-        /// <param name="broadcast">true 为广播给全部客户端</param>
+        /// <param name="broadcast">true to broadcast to all clients.</param>
         private void SendData(bool broadcast)
         {
             if (_currentPort <= 0)
@@ -113,17 +114,18 @@ namespace TcpServer.UI.Forms
                 return;
             }
 
-            // 2026-09-14 新增：勾选"追加 0x0D 0x0A"时，在最终字节流末尾补上回车换行。
-            // 关键点：追加发生在"解析之后"，所以与输入解析方式无关 ——
-            //   文本模式（未勾选 HEX 发送）与 HEX 模式（勾选 HEX 发送）都会生效。
-            // 取舍：若 HEX 模式下已手写 0D 0A，这里仍会再补一次，不做判重，
-            //       目的是让"勾了就一定加"的行为保持可预期，不做隐式猜测。
+            // Added 2026-09-14: when "Append 0x0D 0x0A" is checked, append CR / LF at the end of the final byte stream.
+            // Key point: the append happens *after* parsing, so it is independent of how the input was parsed -
+            //   both text mode (Send as HEX unchecked) and HEX mode (Send as HEX checked) are affected.
+            // Trade-off: if 0D 0A was already written by hand in HEX mode, it is appended once more here with no
+            //            duplicate check, so that "checking it always appends" stays predictable rather than
+            //            relying on implicit guessing.
             if (chkSendCrlf.Checked)
             {
                 data = AppendCrlf(data);
             }
 
-            // 规约要求：提交类操作进行中禁用按钮，防止重复点击
+            // Convention: disable buttons during a submitting operation to prevent double clicks.
             btnSend.Enabled = false;
             btnSendAll.Enabled = false;
             Cursor = Cursors.WaitCursor;
@@ -178,11 +180,12 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 在字节流末尾追加 0x0D 0x0A（回车换行）
-        /// 2026-09-14 新增：配合"追加 0x0D 0x0A"勾选框，供文本 / HEX 两种发送模式共用。
+        /// Appends 0x0D 0x0A (carriage return / line feed) to the end of the byte stream.
+        /// Added 2026-09-14: works together with the "Append 0x0D 0x0A" check box and is shared by both the
+        /// text and the HEX send modes.
         /// </summary>
-        /// <param name="data">原始字节流</param>
-        /// <returns>追加 CRLF 后的新数组（不修改原数组）</returns>
+        /// <param name="data">Original byte stream.</param>
+        /// <returns>A new array with CRLF appended (the original array is not modified).</returns>
         private static byte[] AppendCrlf(byte[] data)
         {
             if (data == null || data.Length == 0)
@@ -199,7 +202,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 重置数据控制台的选择状态
+        /// Resets the selection state of the data console.
         /// </summary>
         private void ResetConsoleSelection()
         {
@@ -211,7 +214,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 从表格选中行更新当前端口，并刷新客户端下拉
+        /// Updates the current port from the selected grid row and refreshes the client drop-down.
         /// </summary>
         private void UpdateCurrentPortFromGrid()
         {
@@ -236,23 +239,25 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 刷新客户端下拉框
-        /// 2026-09-14 修改：原实现依赖 SelectedIndexChanged 事件把选中会话回写到 _currentSessionId，
-        /// 但该方法在"客户端列表为空"或"端口未选中"时会提前 return，既不触发事件也不清空
-        /// _currentSessionId，导致下拉框已空、内部仍指向已下线的会话，
-        /// 此时手动发送会报"客户端已断开"，看起来像程序坏了。
-        /// 现改为：每次重建后按实际选中项强制回写，不再依赖事件是否触发。
+        /// Refreshes the client drop-down.
+        /// 2026-09-14 change: the original implementation relied on the SelectedIndexChanged event to write the
+        /// selected session back into _currentSessionId, but that method returns early when "the client list is
+        /// empty" or "no port is selected", so neither the event fired nor _currentSessionId was cleared. The
+        /// drop-down could be empty while the internals still pointed at an offline session, and a manual send
+        /// then reported "client disconnected", looking like the program was broken.
+        /// It now writes back forcibly according to the actual selection after every rebuild, no longer relying
+        /// on whether the event fires.
         /// </summary>
         private void RefreshClientComboBox()
         {
             try
             {
-                // 记住重建前的选中会话，若其仍在线则继续保持选中
+                // Remember the session selected before the rebuild; keep it selected if still online.
                 string previousSessionId = _currentSessionId;
 
                 cboClient.Items.Clear();
 
-                // 先清空内部选中状态，重建结束后一律以实际选中项为准
+                // Clear the internal selection first; after the rebuild the actual selection is authoritative.
                 _currentSessionId = string.Empty;
 
                 if (_currentPort <= 0 || _serverManager == null) { return; }
@@ -283,12 +288,13 @@ namespace TcpServer.UI.Forms
                     }
                 }
 
-                // 原选中会话已下线（或本来就没选）时，默认选中第一个
+                // When the previously selected session went offline (or nothing was selected), select the first.
                 if (index < 0) { index = 0; }
 
                 cboClient.SelectedIndex = index;
 
-                // 关键：不依赖 SelectedIndexChanged 是否被触发，直接按实际选中项回写内部状态
+                // Key point: do not rely on whether SelectedIndexChanged fired; write the internal state back
+                // directly from the actual selection.
                 ClientInfo selected = cboClient.SelectedItem as ClientInfo;
                 _currentSessionId = selected == null ? string.Empty : selected.SessionId;
             }
@@ -299,11 +305,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 4. 监听事件回调（跨线程，需切回 UI 线程）
+        // 4. Listener event callbacks (cross-thread; must switch back to the UI thread)
         // ============================================================
 
         /// <summary>
-        /// 客户端上下线
+        /// Client online / offline.
         /// </summary>
         private void OnClientChanged(object sender, ClientChangedEventArgs e)
         {
@@ -321,7 +327,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 收到数据
+        /// Data received.
         /// </summary>
         private void OnDataReceived(object sender, PortDataEventArgs e)
         {
@@ -331,7 +337,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 发出数据
+        /// Data sent.
         /// </summary>
         private void OnDataSent(object sender, PortDataEventArgs e)
         {
@@ -341,18 +347,18 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 5. 数据区输出
+        // 5. Data area output
         // ============================================================
 
         /// <summary>
-        /// 将收发数据追加到数据区
+        /// Appends sent / received data to the data area.
         /// </summary>
-        /// <param name="e">数据事件参数</param>
+        /// <param name="e">Data event arguments.</param>
         private void AppendPortData(PortDataEventArgs e)
         {
             if (e == null || e.Port != _currentPort) { return; }
 
-            // 已选定客户端时，只显示该客户端的数据
+            // When a client has been selected, show only that client's data.
             if (!string.IsNullOrWhiteSpace(_currentSessionId) && e.SessionId != _currentSessionId)
             {
                 return;
@@ -377,10 +383,10 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 追加系统提示文本
+        /// Appends a system notice line.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="message">提示内容</param>
+        /// <param name="port">Port number.</param>
+        /// <param name="message">Notice content.</param>
         private void AppendSystemText(int port, string message)
         {
             if (port != _currentPort || string.IsNullOrWhiteSpace(message)) { return; }
@@ -389,9 +395,9 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 向数据区追加一行文本
+        /// Appends one line of text to the data area.
         /// </summary>
-        /// <param name="line">文本行</param>
+        /// <param name="line">Text line.</param>
         private void AppendText(string line)
         {
             UiHelper.AppendLine(txtData, line, MAX_DATA_LINES);

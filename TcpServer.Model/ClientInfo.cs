@@ -3,47 +3,48 @@
 namespace TcpServer.Model
 {
     /// <summary>
-    /// 客户端连接信息实体 —— 描述一个已接入的 TCP 客户端会话
+    /// Client connection information entity - describes a connected TCP client session.
     /// </summary>
     public class ClientInfo
     {
         /// <summary>
-        /// 会话唯一标识（取自自增序号，界面与日志均以此区分）
+        /// Unique session identifier (taken from an auto-increment sequence;
+        /// both the UI and the logs use it to distinguish sessions).
         /// </summary>
         public string SessionId { get; set; }
 
         /// <summary>
-        /// 所属的本地监听端口号
+        /// The local listening port this session belongs to.
         /// </summary>
         public int LocalPort { get; set; }
 
         /// <summary>
-        /// 客户端远端地址（IP:Port）
+        /// Client remote endpoint (IP:Port).
         /// </summary>
         public string RemoteEndPoint { get; set; }
 
         /// <summary>
-        /// 建立连接的时间
+        /// Time the connection was established.
         /// </summary>
         public DateTime ConnectedTime { get; set; }
 
         /// <summary>
-        /// 累计接收字节数
+        /// Cumulative number of bytes received.
         /// </summary>
         public long BytesReceived { get; set; }
 
         /// <summary>
-        /// 累计发送字节数
+        /// Cumulative number of bytes sent.
         /// </summary>
         public long BytesSent { get; set; }
 
         /// <summary>
-        /// 最后一次活动时间（收发均会刷新）
+        /// Last activity time (refreshed on both send and receive).
         /// </summary>
         public DateTime LastActiveTime { get; set; }
 
         /// <summary>
-        /// 构造函数 —— 所有字段均提供默认值
+        /// Constructor - every field is initialized to a default value.
         /// </summary>
         public ClientInfo()
         {
@@ -57,9 +58,9 @@ namespace TcpServer.Model
         }
 
         /// <summary>
-        /// 返回便于日志输出的文本
+        /// Returns a text representation suitable for log output.
         /// </summary>
-        /// <returns>客户端信息描述文本</returns>
+        /// <returns>Client information description text.</returns>
         public override string ToString()
         {
             return string.Format("[{0}] {1}", SessionId ?? string.Empty, RemoteEndPoint ?? string.Empty);

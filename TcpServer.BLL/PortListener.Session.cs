@@ -8,24 +8,29 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 端口监听服务（客户端会话回调与资源清理部分）
-    /// 2026-09-14 拆分：PortListener 主体加入看门狗唤醒机制后再次逼近规约"单类不超 800 行"的红线，
-    /// 按项目既有惯例（参见 frmMain.cs / frmMain.Console.cs / PortListener.Watchdog.cs）拆到本 partial 文件。
-    /// 本文件职责：会话事件回调（收/发/关闭）、客户端集合增删与快照、监听器句柄清理。
-    /// 端口启停见 PortListener.cs，看门狗与线程收尾见 PortListener.Watchdog.cs
+    /// Port listening service (client session callbacks and resource cleanup part).
+    /// 2026-09-14 split: after the watchdog wake-up mechanism was added to the main PortListener body it
+    /// again approached the convention red line of "a single class must not exceed 800 lines", so it was
+    /// split into this partial file following the project's existing practice (see frmMain.cs /
+    /// frmMain.Console.cs / PortListener.Watchdog.cs).
+    /// Responsibilities of this file: session event callbacks (receive / send / close), client collection
+    /// add / remove and snapshots, listener handle cleanup.
+    /// Port start / stop lives in PortListener.cs; the watchdog and thread finalization live in
+    /// PortListener.Watchdog.cs.
     /// </summary>
     public partial class PortListener
     {
-        #region 私有方法 —— 会话回调与资源清理
+        #region Private Methods - Session Callbacks and Cleanup
 
         /// <summary>
-        /// 会话收到数据
+        /// Session received data.
         /// </summary>
         private void OnSessionDataReceived(object sender, PortDataEventArgs e)
         {
             if (e == null) { return; }
 
-            // 2026-09-14 修改：改用原子累加与原子时间更新，多客户端并发时不丢统计
+            // 2026-09-14 change: switched to atomic accumulation and atomic time update, so statistics
+            // are not lost under concurrent multi-client traffic.
             Interlocked.Add(ref _totalBytesReceived, e.Length);
             UpdateLastActiveTime(e.EventTime);
 
@@ -41,13 +46,13 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 会话发出数据
+        /// Session sent data.
         /// </summary>
         private void OnSessionDataSent(object sender, PortDataEventArgs e)
         {
             if (e == null) { return; }
 
-            // 2026-09-14 修改：同接收侧，改为原子累加与原子时间更新
+            // 2026-09-14 change: same as the receive side, switched to atomic accumulation and atomic time update.
             Interlocked.Add(ref _totalBytesSent, e.Length);
             UpdateLastActiveTime(e.EventTime);
 
@@ -63,7 +68,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 会话关闭
+        /// Session closed.
         /// </summary>
         private void OnSessionClosed(object sender, ClientSession session)
         {
@@ -72,7 +77,7 @@ namespace TcpServer.BLL
             ClientInfo info = session.ToClientInfo();
             RemoveClient(session.SessionId);
 
-            // 释放会话资源
+            // Release the session resources.
             try { session.Dispose(); }
             catch (Exception) { }
 
@@ -80,9 +85,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 从字典移除会话
+        /// Removes a session from the dictionary.
         /// </summary>
-        /// <param name="sessionId">会话标识</param>
+        /// <param name="sessionId">Session identifier.</param>
         private void RemoveClient(string sessionId)
         {
             if (string.IsNullOrWhiteSpace(sessionId)) { return; }
@@ -97,9 +102,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取当前客户端快照（避免持锁期间调用外部方法）
+        /// Gets a snapshot of the current clients (avoids calling external methods while holding the lock).
         /// </summary>
-        /// <returns>会话集合，永不为 null</returns>
+        /// <returns>Session collection, never null.</returns>
         private List<ClientSession> GetClientSnapshot()
         {
             List<ClientSession> snapshot = new List<ClientSession>();
@@ -116,7 +121,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 关闭所有客户端连接
+        /// Closes all client connections.
         /// </summary>
         private void CloseAllClients()
         {
@@ -136,7 +141,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 清理监听器资源
+        /// Cleans up the listener resources.
         /// </summary>
         private void CleanupListener()
         {

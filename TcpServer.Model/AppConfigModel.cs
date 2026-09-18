@@ -4,72 +4,72 @@ using System.Collections.Generic;
 namespace TcpServer.Model
 {
     /// <summary>
-    /// 应用配置根对象 —— 对应 Config\portconfig.json 的顶层结构
+    /// Application configuration root object - maps to the top-level structure of Config\portconfig.json.
     /// </summary>
     public class AppConfigModel
     {
         /// <summary>
-        /// 配置结构版本号 —— 后续升级时用于兼容旧文件
+        /// Configuration schema version - used to stay compatible with older files during future upgrades.
         /// </summary>
         public string ConfigVersion { get; set; }
 
         /// <summary>
-        /// 监听地址（如 127.0.0.1、本机网卡地址或 0.0.0.0）
+        /// Listening address (e.g. 127.0.0.1, a local NIC address, or 0.0.0.0).
         /// </summary>
         public string ListenIp { get; set; }
 
         /// <summary>
-        /// 起始端口号（默认 60000）
+        /// Starting port number (default 60000).
         /// </summary>
         public int StartPort { get; set; }
 
         /// <summary>
-        /// 端口数量 —— 从起始端口连开的个数
+        /// Number of ports - how many consecutive ports to open from the starting port.
         /// </summary>
         public int PortCount { get; set; }
 
         /// <summary>
-        /// 是否在程序启动后自动开始监听（默认 false，防止误占端口）
+        /// Whether to start listening automatically after launch (default false, to avoid occupying ports by accident).
         /// </summary>
         public bool AutoStartOnLaunch { get; set; }
 
         /// <summary>
-        /// 数据区是否以十六进制显示（false 为 ASCII）
+        /// Whether the data area is displayed as hexadecimal (false means ASCII).
         /// </summary>
         public bool DisplayAsHex { get; set; }
 
         /// <summary>
-        /// 端口清单 —— 业务配置主体
+        /// Port list - the main body of the business configuration.
         /// </summary>
         public List<PortConfig> Ports { get; set; }
 
         /// <summary>
-        /// 自动应答规则清单
+        /// Auto-reply rule list.
         /// </summary>
         public List<AutoReplyRule> Rules { get; set; }
 
         /// <summary>
-        /// 配置最后保存时间
+        /// Time the configuration was last saved.
         /// </summary>
         public DateTime LastSavedTime { get; set; }
 
-        /// <summary>备用字段 1（规约要求：预留 5 个扩展字段，后续升级不改结构）</summary>
+        /// <summary>Reserved field 1 (convention: keep 5 extension fields so future upgrades do not change the schema)</summary>
         public string Exp1 { get; set; }
 
-        /// <summary>备用字段 2</summary>
+        /// <summary>Reserved field 2</summary>
         public string Exp2 { get; set; }
 
-        /// <summary>备用字段 3</summary>
+        /// <summary>Reserved field 3</summary>
         public string Exp3 { get; set; }
 
-        /// <summary>备用字段 4</summary>
+        /// <summary>Reserved field 4</summary>
         public string Exp4 { get; set; }
 
-        /// <summary>备用字段 5</summary>
+        /// <summary>Reserved field 5</summary>
         public string Exp5 { get; set; }
 
         /// <summary>
-        /// 构造函数 —— 所有字段均提供默认值，并初始化非空集合
+        /// Constructor - every field is initialized to a default value, and non-null collections are created.
         /// </summary>
         public AppConfigModel()
         {

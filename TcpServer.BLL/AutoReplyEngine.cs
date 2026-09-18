@@ -7,12 +7,14 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 自动应答引擎 —— 按预置规则对收到的数据自动回复，用于模拟设备行为
-    /// 匹配策略：按规则列表顺序取第一条命中项；启用/端口限定均参与过滤
+    /// Auto-reply engine - replies automatically to received data according to preset rules,
+    /// simulating device behaviour.
+    /// Matching strategy: the first hit in rule-list order wins; both the enabled flag and the port
+    /// restriction take part in filtering.
     /// </summary>
     public class AutoReplyEngine
     {
-        #region 字段
+        #region Fields
 
         private readonly object _lockObj = new object();
         private List<AutoReplyRule> _rules;
@@ -20,10 +22,11 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 属性
+        #region Properties
 
         /// <summary>
-        /// 匹配与应答时使用的文本编码（默认 GBK，兼容现场设备常见的 ASCII 与中文场景）
+        /// Text encoding used for matching and replying (GBK by default, compatible with the ASCII and
+        /// Chinese scenarios common in on-site devices).
         /// </summary>
         public Encoding TextEncoding
         {
@@ -32,10 +35,10 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         /// <summary>
-        /// 构造函数 —— 使用默认编码 GBK
+        /// Constructor - uses the default GBK encoding.
         /// </summary>
         public AutoReplyEngine()
             : this(null)
@@ -43,9 +46,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 指定文本编码的构造函数
+        /// Constructor taking an explicit text encoding.
         /// </summary>
-        /// <param name="encoding">文本编码，为 null 时使用 GBK</param>
+        /// <param name="encoding">Text encoding; uses GBK when null.</param>
         public AutoReplyEngine(Encoding encoding)
         {
             _rules = new List<AutoReplyRule>();
@@ -70,12 +73,12 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 对外方法
+        #region Public Methods
 
         /// <summary>
-        /// 更新规则清单（传入 null 时视为清空）
+        /// Updates the rule list (passing null is treated as clearing it).
         /// </summary>
-        /// <param name="rules">规则列表</param>
+        /// <param name="rules">Rule list.</param>
         public void UpdateRules(List<AutoReplyRule> rules)
         {
             lock (_lockObj)
@@ -86,9 +89,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取当前规则清单的副本
+        /// Gets a copy of the current rule list.
         /// </summary>
-        /// <returns>规则集合，永不为 null</returns>
+        /// <returns>Rule collection, never null.</returns>
         public List<AutoReplyRule> GetRules()
         {
             lock (_lockObj)
@@ -98,14 +101,14 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 尝试匹配应答规则
+        /// Attempts to match a reply rule.
         /// </summary>
-        /// <param name="port">数据来源端口</param>
-        /// <param name="data">收到的原始数据</param>
-        /// <param name="length">有效数据长度</param>
-        /// <param name="matchedRule">命中的规则，未命中时为 null</param>
-        /// <param name="replyData">应答数据，未命中时为空数组</param>
-        /// <returns>命中返回 true</returns>
+        /// <param name="port">Port the data came from.</param>
+        /// <param name="data">Raw received data.</param>
+        /// <param name="length">Effective data length.</param>
+        /// <param name="matchedRule">The matched rule; null when nothing matched.</param>
+        /// <param name="replyData">Reply data; an empty array when nothing matched.</param>
+        /// <returns>true when a rule was matched.</returns>
         public bool TryMatch(int port, byte[] data, int length,
             out AutoReplyRule matchedRule, out byte[] replyData)
         {
@@ -130,7 +133,7 @@ namespace TcpServer.BLL
                     continue;
                 }
 
-                // 端口限定：0 表示对所有端口生效
+                // Port restriction: 0 means the rule applies to all ports.
                 if (rule.OnlyForPort > 0 && rule.OnlyForPort != port)
                 {
                     continue;
@@ -158,10 +161,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 将文本按当前编码转换为字节数组
+        /// Converts text to a byte array using the current encoding.
         /// </summary>
-        /// <param name="text">文本内容</param>
-        /// <returns>字节数组，永不为 null</returns>
+        /// <param name="text">Text content.</param>
+        /// <returns>Byte array, never null.</returns>
         public byte[] TextToBytes(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -181,11 +184,11 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 将字节数组按当前编码转换为文本
+        /// Converts a byte array to text using the current encoding.
         /// </summary>
-        /// <param name="data">字节数组</param>
-        /// <param name="length">有效长度</param>
-        /// <returns>文本内容，永不为 null</returns>
+        /// <param name="data">Byte array.</param>
+        /// <param name="length">Effective length.</param>
+        /// <returns>Text content, never null.</returns>
         public string BytesToText(byte[] data, int length)
         {
             if (data == null || data.Length == 0 || length < 1)
@@ -207,15 +210,15 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 私有方法
+        #region Private Methods
 
         /// <summary>
-        /// 判断单条规则是否命中
+        /// Determines whether a single rule matches.
         /// </summary>
-        /// <param name="rule">规则</param>
-        /// <param name="data">收到的数据</param>
-        /// <param name="length">有效长度</param>
-        /// <returns>命中返回 true</returns>
+        /// <param name="rule">Rule.</param>
+        /// <param name="data">Received data.</param>
+        /// <param name="length">Effective length.</param>
+        /// <returns>true when it matches.</returns>
         private bool IsMatched(AutoReplyRule rule, byte[] data, int length)
         {
             if (rule == null || string.IsNullOrEmpty(rule.MatchText))
@@ -258,10 +261,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 根据规则构造应答数据
+        /// Builds the reply data for a rule.
         /// </summary>
-        /// <param name="rule">命中的规则</param>
-        /// <returns>应答字节数组，永不为 null</returns>
+        /// <param name="rule">Matched rule.</param>
+        /// <returns>Reply byte array, never null.</returns>
         private byte[] BuildReplyData(AutoReplyRule rule)
         {
             if (rule == null || string.IsNullOrEmpty(rule.ReplyText))
@@ -278,13 +281,13 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 判断字节序列是否完全相等
+        /// Determines whether two byte sequences are exactly equal.
         /// </summary>
-        /// <param name="source">源数据</param>
-        /// <param name="offset">源起始偏移</param>
-        /// <param name="length">源有效长度</param>
-        /// <param name="pattern">比对模式</param>
-        /// <returns>完全相等返回 true</returns>
+        /// <param name="source">Source data.</param>
+        /// <param name="offset">Source start offset.</param>
+        /// <param name="length">Source effective length.</param>
+        /// <param name="pattern">Pattern to compare.</param>
+        /// <returns>true when exactly equal.</returns>
         private bool ByteEquals(byte[] source, int offset, int length, byte[] pattern)
         {
             if (source == null || pattern == null) { return false; }
@@ -299,13 +302,13 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 判断字节序列是否包含指定模式
+        /// Determines whether a byte sequence contains the specified pattern.
         /// </summary>
-        /// <param name="source">源数据</param>
-        /// <param name="offset">源起始偏移</param>
-        /// <param name="length">源有效长度</param>
-        /// <param name="pattern">比对模式</param>
-        /// <returns>包含返回 true</returns>
+        /// <param name="source">Source data.</param>
+        /// <param name="offset">Source start offset.</param>
+        /// <param name="length">Source effective length.</param>
+        /// <param name="pattern">Pattern to compare.</param>
+        /// <returns>true when contained.</returns>
         private bool ByteContains(byte[] source, int offset, int length, byte[] pattern)
         {
             if (source == null || pattern == null) { return false; }

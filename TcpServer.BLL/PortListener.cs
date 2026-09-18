@@ -10,13 +10,15 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 端口监听服务 —— 负责单个 TCP 端口的监听、客户端接入与收发调度
-    /// 规约要求：设备连接断开不允许二次连接；启动前做端口可用性检查；循环线程必须为后台线程
-    /// 2026-09-14 拆分：看门狗与线程收尾部分移至 PortListener.Watchdog.cs
+    /// Port listening service - handles listening on a single TCP port, client admission and
+    /// send / receive scheduling.
+    /// Convention: a device that has disconnected is not allowed to connect a second time; run a port
+    ///             availability check before starting; loop threads must be background threads.
+    /// 2026-09-14 split: the watchdog and thread-finalization parts moved to PortListener.Watchdog.cs.
     /// </summary>
     public partial class PortListener : IDisposable
     {
-        #region 字段
+        #region Fields
 
         private readonly object _clientsLock = new object();
         private readonly Dictionary<string, ClientSession> _clients = new Dictionary<string, ClientSession>();
@@ -31,16 +33,18 @@ namespace TcpServer.BLL
         private int _sessionSeed;
 
         /// <summary>
-        /// 看门狗唤醒信号（2026-09-14 新增）：Stop 时立即唤醒巡检中的看门狗，避免 Join 空等满一个巡检周期。
-        /// 机制详见 PortListener.Watchdog.cs 中 WakeupWatchdog / WatchdogLoop 的说明。
+        /// Watchdog wake-up signal (added 2026-09-14): wakes an inspecting watchdog immediately on Stop,
+        /// so Join does not sit idle for a whole inspection period.
+        /// See the notes on WakeupWatchdog / WatchdogLoop in PortListener.Watchdog.cs for the mechanism.
         /// </summary>
         private readonly ManualResetEventSlim _watchdogWakeup = new ManualResetEventSlim(false);
 
         /// <summary>
-        /// 看门狗代数（2026-09-14 新增）
-        /// 用途：Stop 后立即 Start 时，旧看门狗线程可能仍在 Sleep 中，
-        ///       醒来后会把 _watchdogRunning 重新当作 true 继续巡检，导致两条看门狗并存、
-        ///       故障时并发重建监听。用代数号让旧线程识别出自己已过期并退出。
+        /// Watchdog generation counter (added 2026-09-14).
+        /// Purpose: when Stop is immediately followed by Start, the old watchdog thread may still be
+        ///          sleeping; on waking it would treat _watchdogRunning as true again and keep inspecting,
+        ///          leaving two watchdogs running and rebuilding the listener concurrently on failure.
+        ///          The generation number lets an old thread recognise that it is superseded and exit.
         /// </summary>
         private int _watchdogGeneration;
 
@@ -48,34 +52,34 @@ namespace TcpServer.BLL
         private volatile bool _watchdogRunning;
         private bool _disposed;
 
-        // 2026-09-14 改为原子更新：多客户端并发收发时，普通 += 会丢统计
+        // 2026-09-14 switched to atomic updates: with concurrent multi-client traffic, a plain += loses counts.
         private long _totalBytesReceived;
         private long _totalBytesSent;
         private long _lastActiveTicks;
 
-        /// <summary>单端口允许的最大客户端连接数</summary>
+        /// <summary>Maximum number of client connections allowed on one port.</summary>
         private const int MAX_CLIENTS_PER_PORT = 64;
 
         #endregion
 
-        #region 属性
+        #region Properties
 
-        /// <summary>监听端口号</summary>
+        /// <summary>Listening port number.</summary>
         public int Port { get; private set; }
 
-        /// <summary>当前监听地址</summary>
+        /// <summary>Current listening address.</summary>
         public string ListenIp
         {
             get { return _listenIp; }
         }
 
-        /// <summary>当前运行状态</summary>
+        /// <summary>Current runtime state.</summary>
         public PortState State { get; private set; }
 
-        /// <summary>状态补充说明</summary>
+        /// <summary>Supplementary state description.</summary>
         public string StateMessage { get; private set; }
 
-        /// <summary>当前在线客户端数量</summary>
+        /// <summary>Number of clients currently online.</summary>
         public int ClientCount
         {
             get
@@ -87,14 +91,14 @@ namespace TcpServer.BLL
             }
         }
 
-        /// <summary>是否正在监听</summary>
+        /// <summary>Whether the port is currently listening.</summary>
         public bool IsListening
         {
             get { return _running && State == PortState.Listening; }
         }
 
         /// <summary>
-        /// 最近一次活动时间（2026-09-14 新增，原子读取）
+        /// Most recent activity time (added 2026-09-14, read atomically).
         /// </summary>
         private DateTime LastActiveTime
         {
@@ -107,29 +111,29 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 事件
+        #region Events
 
-        /// <summary>状态变化事件</summary>
+        /// <summary>State change event.</summary>
         public event EventHandler<PortStateChangedEventArgs> StateChanged;
 
-        /// <summary>客户端上下线事件</summary>
+        /// <summary>Client online / offline event.</summary>
         public event EventHandler<ClientChangedEventArgs> ClientChanged;
 
-        /// <summary>收到数据事件</summary>
+        /// <summary>Data received event.</summary>
         public event EventHandler<PortDataEventArgs> DataReceived;
 
-        /// <summary>发出数据事件</summary>
+        /// <summary>Data sent event.</summary>
         public event EventHandler<PortDataEventArgs> DataSent;
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         /// <summary>
-        /// 构造函数
+        /// Constructor.
         /// </summary>
-        /// <param name="port">监听端口号</param>
-        /// <param name="listenIp">监听地址，为空时使用默认地址</param>
+        /// <param name="port">Listening port number.</param>
+        /// <param name="listenIp">Listening address; uses the default address when empty.</param>
         public PortListener(int port, string listenIp)
         {
             Port = port;
@@ -150,13 +154,13 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 对外方法
+        #region Public Methods
 
         /// <summary>
-        /// 修改监听地址 —— 仅在未监听状态下允许修改
+        /// Changes the listening address - only allowed while not listening.
         /// </summary>
-        /// <param name="listenIp">新的监听地址</param>
-        /// <returns>修改成功返回 true</returns>
+        /// <param name="listenIp">New listening address.</param>
+        /// <returns>true when the change succeeded.</returns>
         public bool ChangeListenIp(string listenIp)
         {
             if (_running)
@@ -174,10 +178,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 启动监听
+        /// Starts listening.
         /// </summary>
-        /// <param name="message">输出提示信息</param>
-        /// <returns>启动成功返回 true</returns>
+        /// <param name="message">Output message.</param>
+        /// <returns>true when the start succeeded.</returns>
         public bool Start(out string message)
         {
             message = string.Empty;
@@ -188,7 +192,7 @@ namespace TcpServer.BLL
                 return false;
             }
 
-            // 规约要求：网络设备不允许二次连接
+            // Convention: a network device is not allowed to connect a second time.
             if (_running)
             {
                 message = "This port is already listening";
@@ -209,8 +213,9 @@ namespace TcpServer.BLL
                 return false;
             }
 
-            // 启动前先做端口占用检查（规约：写入前加网络连通性测试）
-            // 2026-09-14 修改：按实际要监听的地址探测，避免其它程序只绑某块网卡时误报"已被占用"
+            // Check port occupancy before starting (convention: run a network connectivity test before binding).
+            // 2026-09-14 change: probe against the address actually being listened on, so that another program
+            // having bound only one NIC does not cause a false "already in use".
             if (!NetHelper.IsPortAvailable(_listenIp, Port))
             {
                 message = "Port already in use by another program";
@@ -234,7 +239,7 @@ namespace TcpServer.BLL
                 _acceptThread.Name = string.Format("TcpAccept_{0}", Port);
                 _acceptThread.Start();
 
-                // 2026-09-14 新增：启动监听线程看门狗
+                // Added 2026-09-14: start the listener-thread watchdog.
                 StartWatchdog();
 
                 SetState(PortState.Listening, "Listening");
@@ -260,7 +265,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 停止监听 —— 会关闭该端口下所有客户端连接（幂等）
+        /// Stops listening - closes every client connection under this port (idempotent).
         /// </summary>
         public void Stop()
         {
@@ -269,31 +274,34 @@ namespace TcpServer.BLL
                 return;
             }
 
-            // 2026-09-14 修改：先记录停止前的状态与说明。
-            // 原实现无条件把状态置为 Stopped，会把 Faulted 的故障原因（如"端口已被占用"）冲掉，
-            // 界面上就看不到真实失败原因了；此处保留故障态。
+            // 2026-09-14 change: capture the state and message from before the stop.
+            // The original implementation unconditionally set the state to Stopped, which wiped the reason
+            // for a Faulted condition (such as "port already in use"), hiding the real failure cause in the UI;
+            // the fault state is preserved here.
             PortState previousState = State;
             string previousMessage = StateMessage;
 
             SetState(PortState.Stopping, "Stopping listener");
 
-            // 2026-09-14 新增：先停看门狗，避免停止过程中被自动重启
-            // 同时递增代数号，让旧看门狗线程醒来后据此判断自己已过期并退出
+            // Added 2026-09-14: stop the watchdog first so it cannot auto-restart during the stop.
+            // The generation counter is also incremented so an old watchdog thread sees on waking that it
+            // is superseded and exits.
             Interlocked.Increment(ref _watchdogGeneration);
             _watchdogRunning = false;
 
-            // 2026-09-14 修改：立即唤醒巡检中的看门狗，否则下面的 JoinThread 必须空等满超时（实测每个端口 1 秒）
+            // 2026-09-14 change: wake the inspecting watchdog immediately; otherwise the JoinThread call
+            // below has to wait out the full timeout (measured as 1 second per port).
             WakeupWatchdog();
 
             _running = false;
 
-            // 先断开全部客户端
+            // Disconnect all clients first.
             CloseAllClients();
 
-            // 再关闭监听器，使阻塞中的 Accept 立即返回
+            // Then close the listener so a blocked Accept returns immediately.
             CleanupListener();
 
-            // 等待接收线程退出，避免资源悬挂
+            // Wait for the accept thread to exit, avoiding lingering resources.
             JoinThread(_acceptThread, 2000);
             _acceptThread = null;
 
@@ -317,12 +325,12 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 向指定客户端发送数据
+        /// Sends data to the specified client.
         /// </summary>
-        /// <param name="sessionId">会话标识</param>
-        /// <param name="data">待发送数据</param>
-        /// <param name="error">失败原因</param>
-        /// <returns>发送成功返回 true</returns>
+        /// <param name="sessionId">Session identifier.</param>
+        /// <param name="data">Data to send.</param>
+        /// <param name="error">Failure reason.</param>
+        /// <returns>true when the send succeeded.</returns>
         public bool SendToClient(string sessionId, byte[] data, out string error)
         {
             error = string.Empty;
@@ -352,11 +360,11 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 向该端口所有在线客户端广播数据
+        /// Broadcasts data to every client online on this port.
         /// </summary>
-        /// <param name="data">待发送数据</param>
-        /// <param name="error">失败原因（全部失败时填充）</param>
-        /// <returns>成功发送的客户端数量</returns>
+        /// <param name="data">Data to send.</param>
+        /// <param name="error">Failure reason (filled when every send failed).</param>
+        /// <returns>Number of clients the data was sent to successfully.</returns>
         public int SendToAllClients(byte[] data, out string error)
         {
             error = string.Empty;
@@ -389,9 +397,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取当前在线客户端信息列表（快照）
+        /// Gets a snapshot of the currently online client information.
         /// </summary>
-        /// <returns>客户端信息集合，永不为 null</returns>
+        /// <returns>Client information collection, never null.</returns>
         public List<ClientInfo> GetClientList()
         {
             List<ClientInfo> list = new List<ClientInfo>();
@@ -407,11 +415,11 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取运行时状态信息（供界面表格绑定）
+        /// Gets runtime state information (bound to the main grid).
         /// </summary>
-        /// <param name="enabled">配置中的启用状态</param>
-        /// <param name="remark">备注名称</param>
-        /// <returns>运行时状态对象，永不为 null</returns>
+        /// <param name="enabled">Enabled state from the configuration.</param>
+        /// <param name="remark">Remark name.</param>
+        /// <returns>Runtime state object, never null.</returns>
         public PortRuntimeInfo GetRuntimeInfo(bool enabled, string remark)
         {
             PortRuntimeInfo info = new PortRuntimeInfo();
@@ -428,7 +436,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 释放资源
+        /// Releases resources.
         /// </summary>
         public void Dispose()
         {
@@ -451,10 +459,10 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 私有方法
+        #region Private Methods
 
         /// <summary>
-        /// 接受客户端连接循环（后台线程）
+        /// Accept-client loop (background thread).
         /// </summary>
         private void AcceptLoop()
         {
@@ -478,16 +486,18 @@ namespace TcpServer.BLL
                         break;
                     }
 
-                    // 2026-09-14 修改：原为 break，会导致监听线程在异常后静默退出——
-                    // 界面仍显示"监听中"，但之后所有新连接都接不进来，只能重启程序。
-                    // 改为跳过本次异常继续 Accept，保证短连接"断开后下次还能连"。
+                    // 2026-09-14 change: this used to `break`, which made the listener thread exit silently
+                    // after an exception - the UI still showed "Listening" but no new connection could ever
+                    // get in again, leaving a program restart as the only fix.
+                    // It now skips the failed iteration and continues accepting, so a short-lived connection
+                    // can still connect again after disconnecting.
                     LogHelper.Instance.Warn(string.Format("Port {0}: exception while accepting connection: {1}", Port, ex.Message));
                     SleepAcceptBackoff();
                     continue;
                 }
                 catch (ObjectDisposedException)
                 {
-                    // 监听器已被主动关闭，属正常退出
+                    // The listener was closed deliberately; this is a normal exit.
                     break;
                 }
                 catch (InvalidOperationException)
@@ -501,7 +511,8 @@ namespace TcpServer.BLL
                         break;
                     }
 
-                    // 2026-09-14 修改：同 SocketException，未知异常同样不应终止整个监听循环
+                    // 2026-09-14 change: as with SocketException, an unknown exception must not terminate
+                    // the whole accept loop either.
                     LogHelper.Instance.Error(string.Format("Port {0}: unknown exception while accepting connection: {1}", Port, ex.Message), ex);
                     SleepAcceptBackoff();
                     continue;
@@ -517,8 +528,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// Accept 异常后的短暂退避（2026-09-14 新增）
-        /// 用途：异常持续抛出时（如系统瞬时句柄不足），避免循环空转占满 CPU
+        /// Brief back-off after an Accept exception (added 2026-09-14).
+        /// Purpose: when exceptions keep being thrown (for example a momentary system-wide handle shortage),
+        ///          prevent a tight busy loop from saturating the CPU.
         /// </summary>
         private void SleepAcceptBackoff()
         {
@@ -532,9 +544,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 处理新接入的客户端
+        /// Handles a newly accepted client.
         /// </summary>
-        /// <param name="socket">已连接的套接字</param>
+        /// <param name="socket">The connected socket.</param>
         private void HandleNewClient(Socket socket)
         {
             string sessionId = string.Empty;
@@ -568,8 +580,9 @@ namespace TcpServer.BLL
                 {
                     RemoveClient(sessionId);
 
-                    // 2026-09-14 新增：启动接收线程失败时原先只从字典移除，
-                    // 未释放套接字，会造成句柄泄漏；此处补上释放
+                    // Added 2026-09-14: when starting the receive thread failed, the original code only
+                    // removed the session from the dictionary without releasing the socket, leaking handles;
+                    // the release is added here.
                     try { session.Dispose(); }
                     catch (Exception) { }
 
@@ -597,11 +610,12 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 原子更新"最后活动时间"（2026-09-14 新增）
-        /// 说明：DateTime 不是原子类型，直接赋值在多客户端并发时可能读到中间态，
-        ///       故以 Ticks 存储并用 CAS 循环只向前推进。
+        /// Atomically updates the "last active time" (added 2026-09-14).
+        /// Note: DateTime is not atomic, so a direct assignment could be read mid-write under concurrent
+        ///       multi-client traffic; it is therefore stored as Ticks and advanced forward only, using a
+        ///       CAS loop.
         /// </summary>
-        /// <param name="time">活动时间</param>
+        /// <param name="time">Activity time.</param>
         private void UpdateLastActiveTime(DateTime time)
         {
             long ticks = time.Ticks;
@@ -620,10 +634,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 设置状态并触发事件
+        /// Sets the state and raises the event.
         /// </summary>
-        /// <param name="state">新状态</param>
-        /// <param name="message">状态说明</param>
+        /// <param name="state">New state.</param>
+        /// <param name="message">State description.</param>
         private void SetState(PortState state, string message)
         {
             State = state;
@@ -648,10 +662,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 触发客户端上下线事件
+        /// Raises the client online / offline event.
         /// </summary>
-        /// <param name="client">客户端信息</param>
-        /// <param name="isConnected">是否为上线</param>
+        /// <param name="client">Client information.</param>
+        /// <param name="isConnected">Whether the client came online.</param>
         private void RaiseClientChanged(ClientInfo client, bool isConnected)
         {
             EventHandler<ClientChangedEventArgs> handler = ClientChanged;

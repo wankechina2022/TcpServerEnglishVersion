@@ -3,57 +3,57 @@
 namespace TcpServer.Model
 {
     /// <summary>
-    /// 端口运行时状态实体 —— 供主界面表格绑定的只读视图对象
+    /// Port runtime state entity - a read-only view object bound to the main grid.
     /// </summary>
     public class PortRuntimeInfo
     {
         /// <summary>
-        /// 监听端口号
+        /// Listening port number.
         /// </summary>
         public int Port { get; set; }
 
         /// <summary>
-        /// 是否启用（未启用的端口不参与"启动全部"）
+        /// Whether enabled (disabled ports are excluded from "Start All").
         /// </summary>
         public bool Enabled { get; set; }
 
         /// <summary>
-        /// 备注名称
+        /// Remark name.
         /// </summary>
         public string Remark { get; set; }
 
         /// <summary>
-        /// 当前运行状态
+        /// Current runtime state.
         /// </summary>
         public PortState State { get; set; }
 
         /// <summary>
-        /// 当前在线客户端数量
+        /// Number of clients currently online.
         /// </summary>
         public int ClientCount { get; set; }
 
         /// <summary>
-        /// 累计接收字节数
+        /// Cumulative number of bytes received.
         /// </summary>
         public long BytesReceived { get; set; }
 
         /// <summary>
-        /// 累计发送字节数
+        /// Cumulative number of bytes sent.
         /// </summary>
         public long BytesSent { get; set; }
 
         /// <summary>
-        /// 最后一次活动时间
+        /// Last activity time.
         /// </summary>
         public DateTime LastActiveTime { get; set; }
 
         /// <summary>
-        /// 状态补充说明（如"端口被占用""已停止"），可为空
+        /// Supplementary state description (e.g. "port already in use", "stopped"); may be empty.
         /// </summary>
         public string Message { get; set; }
 
         /// <summary>
-        /// 状态的界面显示文本
+        /// UI display text for the state.
         /// </summary>
         public string StateText
         {
@@ -76,7 +76,7 @@ namespace TcpServer.Model
         }
 
         /// <summary>
-        /// 构造函数 —— 所有字段均提供默认值
+        /// Constructor - every field is initialized to a default value.
         /// </summary>
         public PortRuntimeInfo()
         {

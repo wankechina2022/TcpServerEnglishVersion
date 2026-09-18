@@ -5,16 +5,17 @@ using System.Data;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 常用扩展方法类 —— 数据转换与空值保护（规约：返回非空集合，避免调用方判空）
+    /// Common extension methods - data conversion and null protection
+    /// (convention: return non-null collections so callers do not need null checks).
     /// </summary>
     public static class Extensions
     {
         /// <summary>
-        /// 将 DataTable 转换为 List（规约提供，便于后续接入数据库）
+        /// Converts a DataTable to a List (provided by convention for future database integration).
         /// </summary>
-        /// <typeparam name="T">目标实体类型</typeparam>
-        /// <param name="dt">数据源，为 null 时返回空集合</param>
-        /// <returns>实体集合，永不为 null</returns>
+        /// <typeparam name="T">Target entity type.</typeparam>
+        /// <param name="dt">Data source; returns an empty collection when null.</param>
+        /// <returns>Entity collection, never null.</returns>
         public static List<T> ToList<T>(this DataTable dt) where T : new()
         {
             List<T> list = new List<T>();
@@ -40,7 +41,8 @@ namespace TcpServer.Common.Helpers
                         }
                         catch (Exception)
                         {
-                            // 单个字段转换失败时保留默认值，不中断整体转换
+                            // When a single field fails to convert, keep its default value
+                            // instead of aborting the whole conversion.
                         }
                     }
                 }
@@ -51,21 +53,21 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// DataTable 为空时返回空表
+        /// Returns an empty table when the DataTable is null.
         /// </summary>
-        /// <param name="dt">数据源</param>
-        /// <returns>非空的 DataTable</returns>
+        /// <param name="dt">Data source.</param>
+        /// <returns>A non-null DataTable.</returns>
         public static DataTable SafeReturn(this DataTable dt)
         {
             return dt ?? new DataTable();
         }
 
         /// <summary>
-        /// 字符串截断
+        /// Truncates a string.
         /// </summary>
-        /// <param name="value">源字符串</param>
-        /// <param name="maxLength">最大长度</param>
-        /// <returns>截断后的字符串</returns>
+        /// <param name="value">Source string.</param>
+        /// <param name="maxLength">Maximum length.</param>
+        /// <returns>The truncated string.</returns>
         public static string Truncate(this string value, int maxLength)
         {
             if (string.IsNullOrEmpty(value) || maxLength < 1)
@@ -77,11 +79,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 对象转整数（安全转换）
+        /// Converts an object to an integer (safe conversion).
         /// </summary>
-        /// <param name="value">源对象</param>
-        /// <param name="defaultValue">转换失败时的默认值</param>
-        /// <returns>转换结果</returns>
+        /// <param name="value">Source object.</param>
+        /// <param name="defaultValue">Default value used when conversion fails.</param>
+        /// <returns>Conversion result.</returns>
         public static int ToInt(this object value, int defaultValue = 0)
         {
             if (value == null || value == DBNull.Value)
@@ -94,11 +96,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 对象转长整数（安全转换）
+        /// Converts an object to a long integer (safe conversion).
         /// </summary>
-        /// <param name="value">源对象</param>
-        /// <param name="defaultValue">转换失败时的默认值</param>
-        /// <returns>转换结果</returns>
+        /// <param name="value">Source object.</param>
+        /// <param name="defaultValue">Default value used when conversion fails.</param>
+        /// <returns>Conversion result.</returns>
         public static long ToLong(this object value, long defaultValue = 0L)
         {
             if (value == null || value == DBNull.Value)
@@ -111,11 +113,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 对象转小数（安全转换）
+        /// Converts an object to a decimal (safe conversion).
         /// </summary>
-        /// <param name="value">源对象</param>
-        /// <param name="defaultValue">转换失败时的默认值</param>
-        /// <returns>转换结果</returns>
+        /// <param name="value">Source object.</param>
+        /// <param name="defaultValue">Default value used when conversion fails.</param>
+        /// <returns>Conversion result.</returns>
         public static decimal ToDecimal(this object value, decimal defaultValue = 0m)
         {
             if (value == null || value == DBNull.Value)
@@ -128,11 +130,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 对象转字符串（安全转换）
+        /// Converts an object to a string (safe conversion).
         /// </summary>
-        /// <param name="value">源对象</param>
-        /// <param name="defaultValue">空值时的默认值</param>
-        /// <returns>转换结果</returns>
+        /// <param name="value">Source object.</param>
+        /// <param name="defaultValue">Default value used when the source is null.</param>
+        /// <returns>Conversion result.</returns>
         public static string ToSafeString(this object value, string defaultValue = "")
         {
             if (value == null || value == DBNull.Value)
@@ -144,21 +146,21 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 集合空值保护 —— 永不为 null
+        /// Null protection for collections - never null.
         /// </summary>
-        /// <typeparam name="T">元素类型</typeparam>
-        /// <param name="list">源集合</param>
-        /// <returns>非空集合</returns>
+        /// <typeparam name="T">Element type.</typeparam>
+        /// <param name="list">Source collection.</param>
+        /// <returns>A non-null collection.</returns>
         public static List<T> SafeReturn<T>(this List<T> list)
         {
             return list ?? new List<T>();
         }
 
         /// <summary>
-        /// 字节数格式化为易读文本（B / KB / MB）
+        /// Formats a byte count as human-readable text (B / KB / MB).
         /// </summary>
-        /// <param name="bytes">字节数</param>
-        /// <returns>易读文本</returns>
+        /// <param name="bytes">Byte count.</param>
+        /// <returns>Human-readable text.</returns>
         public static string ToSizeText(this long bytes)
         {
             if (bytes < 1024L)

@@ -4,32 +4,32 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 端口状态变化事件参数
+    /// Port state change event arguments.
     /// </summary>
     public class PortStateChangedEventArgs : EventArgs
     {
         /// <summary>
-        /// 端口号
+        /// Port number.
         /// </summary>
         public int Port { get; set; }
 
         /// <summary>
-        /// 变化后的状态
+        /// The state after the change.
         /// </summary>
         public PortState State { get; set; }
 
         /// <summary>
-        /// 状态说明（启动失败原因等），可为空
+        /// State description (start failure reason, etc.); may be empty.
         /// </summary>
         public string Message { get; set; }
 
         /// <summary>
-        /// 事件发生时间
+        /// Time the event occurred.
         /// </summary>
         public DateTime EventTime { get; set; }
 
         /// <summary>
-        /// 构造函数 —— 所有字段均提供默认值
+        /// Constructor - every field is initialized to a default value.
         /// </summary>
         public PortStateChangedEventArgs()
         {

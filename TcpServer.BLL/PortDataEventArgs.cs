@@ -4,47 +4,47 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 端口数据事件参数（收到数据 / 发出数据）
+    /// Port data event arguments (data received / data sent).
     /// </summary>
     public class PortDataEventArgs : EventArgs
     {
         /// <summary>
-        /// 所属端口号
+        /// Port number this data belongs to.
         /// </summary>
         public int Port { get; set; }
 
         /// <summary>
-        /// 会话唯一标识
+        /// Unique session identifier.
         /// </summary>
         public string SessionId { get; set; }
 
         /// <summary>
-        /// 客户端远端地址（IP:Port）
+        /// Client remote endpoint (IP:Port).
         /// </summary>
         public string RemoteEndPoint { get; set; }
 
         /// <summary>
-        /// 数据方向
+        /// Data direction.
         /// </summary>
         public DataDirection Direction { get; set; }
 
         /// <summary>
-        /// 原始字节数据
+        /// Raw byte data.
         /// </summary>
         public byte[] Data { get; set; }
 
         /// <summary>
-        /// 本次有效字节长度
+        /// Effective byte length for this event.
         /// </summary>
         public int Length { get; set; }
 
         /// <summary>
-        /// 事件发生时间
+        /// Time the event occurred.
         /// </summary>
         public DateTime EventTime { get; set; }
 
         /// <summary>
-        /// 十六进制显示文本
+        /// Hexadecimal display text.
         /// </summary>
         public string HexText
         {
@@ -56,7 +56,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 构造函数 —— 所有字段均提供默认值
+        /// Constructor - every field is initialized to a default value.
         /// </summary>
         public PortDataEventArgs()
         {
@@ -70,15 +70,15 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 由字节数据构造事件参数
+        /// Builds event arguments from byte data.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="sessionId">会话标识</param>
-        /// <param name="remoteEndPoint">远端地址</param>
-        /// <param name="direction">数据方向</param>
-        /// <param name="data">原始数据</param>
-        /// <param name="length">有效长度</param>
-        /// <returns>事件参数对象，永不为 null</returns>
+        /// <param name="port">Port number.</param>
+        /// <param name="sessionId">Session identifier.</param>
+        /// <param name="remoteEndPoint">Remote endpoint.</param>
+        /// <param name="direction">Data direction.</param>
+        /// <param name="data">Raw data.</param>
+        /// <param name="length">Effective length.</param>
+        /// <returns>Event arguments object, never null.</returns>
         public static PortDataEventArgs Create(int port, string sessionId, string remoteEndPoint,
             DataDirection direction, byte[] data, int length)
         {

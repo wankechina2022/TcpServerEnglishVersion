@@ -3,14 +3,14 @@
     partial class frmAbout
     {
         /// <summary>
-        /// 必需的设计器变量
+        /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        /// 清理所有正在使用的资源
+        /// Cleans up all resources in use.
         /// </summary>
-        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false</param>
+        /// <param name="disposing">True to release managed resources; otherwise false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -21,10 +21,19 @@
             base.Dispose(disposing);
         }
 
-        #region Windows 窗体设计器生成的代码
+        #region Windows Form Designer generated code
+
+        // ----------------------------------------------------------------------------
+        // 2026-09-18 English edition - layout adjustments in this file:
+        //   lblDescription : height 90 -> 210  (the longer English description needs ~11 lines)
+        //   lblPaths       : Y 184 -> 300      (cleared by the taller lblDescription)
+        //   btnClose       : Y 266 -> 412      (cleared by the repositioned lblPaths)
+        //   frmAbout       : ClientSize height 312 -> 462 (to fit the grown labels above)
+        // No control text, name, z-order or tab order was changed.
+        // ----------------------------------------------------------------------------
 
         /// <summary>
-        /// 设计器支持所需的方法 - 不要修改此方法的内容
+        /// Designer support method - do not modify the body of this method.
         /// </summary>
         private void InitializeComponent()
         {
@@ -56,21 +65,21 @@
             // 
             this.lblDescription.Location = new System.Drawing.Point(22, 84);
             this.lblDescription.Name = "lblDescription";
-            this.lblDescription.Size = new System.Drawing.Size(420, 90);
+            this.lblDescription.Size = new System.Drawing.Size(420, 210);
             this.lblDescription.TabIndex = 2;
             this.lblDescription.Text = "Description";
             // 
             // lblPaths
             // 
-            this.lblPaths.Location = new System.Drawing.Point(22, 184);
+            this.lblPaths.Location = new System.Drawing.Point(22, 300);
             this.lblPaths.Name = "lblPaths";
-            this.lblPaths.Size = new System.Drawing.Size(420, 70);
+            this.lblPaths.Size = new System.Drawing.Size(420, 90);
             this.lblPaths.TabIndex = 3;
             this.lblPaths.Text = "Paths";
             // 
             // btnClose
             // 
-            this.btnClose.Location = new System.Drawing.Point(350, 266);
+            this.btnClose.Location = new System.Drawing.Point(350, 412);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(90, 30);
             this.btnClose.TabIndex = 4;
@@ -81,7 +90,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(464, 312);
+            this.ClientSize = new System.Drawing.Size(464, 462);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.lblPaths);
             this.Controls.Add(this.lblDescription);

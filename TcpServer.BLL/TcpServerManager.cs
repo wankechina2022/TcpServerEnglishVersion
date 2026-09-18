@@ -9,11 +9,11 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 多端口监听管理器 —— 统一调度一组端口监听服务，并驱动自动应答
+    /// Multi-port listening manager - schedules a group of port listening services and drives auto-reply.
     /// </summary>
     public class TcpServerManager : IDisposable
     {
-        #region 字段
+        #region Fields
 
         private readonly object _lockObj = new object();
         private readonly Dictionary<int, PortListener> _listeners = new Dictionary<int, PortListener>();
@@ -24,9 +24,9 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 属性
+        #region Properties
 
-        /// <summary>当前正在监听的端口数量</summary>
+        /// <summary>Number of ports currently listening.</summary>
         public int ListeningCount
         {
             get
@@ -43,7 +43,7 @@ namespace TcpServer.BLL
             }
         }
 
-        /// <summary>当前配置的端口清单副本</summary>
+        /// <summary>Copy of the currently configured port list.</summary>
         public List<PortConfig> PortConfigs
         {
             get
@@ -55,13 +55,13 @@ namespace TcpServer.BLL
             }
         }
 
-        /// <summary>当前监听地址</summary>
+        /// <summary>Current listening address.</summary>
         public string ListenIp
         {
             get { return _listenIp; }
         }
 
-        /// <summary>自动应答引擎实例</summary>
+        /// <summary>Auto-reply engine instance.</summary>
         public AutoReplyEngine ReplyEngine
         {
             get { return _replyEngine; }
@@ -69,26 +69,26 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 事件
+        #region Events
 
-        /// <summary>端口状态变化事件</summary>
+        /// <summary>Port state change event.</summary>
         public event EventHandler<PortStateChangedEventArgs> PortStateChanged;
 
-        /// <summary>客户端上下线事件</summary>
+        /// <summary>Client online / offline event.</summary>
         public event EventHandler<ClientChangedEventArgs> ClientChanged;
 
-        /// <summary>收到数据事件</summary>
+        /// <summary>Data received event.</summary>
         public event EventHandler<PortDataEventArgs> DataReceived;
 
-        /// <summary>发出数据事件</summary>
+        /// <summary>Data sent event.</summary>
         public event EventHandler<PortDataEventArgs> DataSent;
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         /// <summary>
-        /// 构造函数 —— 使用默认监听地址与默认编码
+        /// Constructor - uses the default listening address and the default encoding.
         /// </summary>
         public TcpServerManager()
             : this(ConfigHelper.DefaultListenIp, null)
@@ -96,10 +96,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 构造函数
+        /// Constructor.
         /// </summary>
-        /// <param name="listenIp">监听地址，为空时使用默认地址</param>
-        /// <param name="encoding">文本编码，为 null 时使用 GBK</param>
+        /// <param name="listenIp">Listening address; uses the default address when empty.</param>
+        /// <param name="encoding">Text encoding; uses GBK when null.</param>
         public TcpServerManager(string listenIp, Encoding encoding)
         {
             _listenIp = string.IsNullOrWhiteSpace(listenIp) ? AppConstants.DEFAULT_LISTEN_IP : listenIp.Trim();
@@ -110,19 +110,20 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 配置相关
+        #region Configuration
 
         /// <summary>
-        /// 设置端口清单 —— 会重建监听器实例（不影响已启动的监听，直到再次 Start）
+        /// Sets the port list - rebuilds listener instances (does not affect listeners already started
+        /// until Start is called again).
         /// </summary>
-        /// <param name="configs">端口配置列表，可为 null</param>
+        /// <param name="configs">Port configuration list; may be null.</param>
         public void SetPortConfigs(List<PortConfig> configs)
         {
             lock (_lockObj)
             {
                 _portConfigs = configs ?? new List<PortConfig>();
 
-                // 清除已不在清单中的监听器
+                // Remove listeners that are no longer in the list.
                 List<int> configPorts = new List<int>();
                 foreach (PortConfig cfg in _portConfigs)
                 {
@@ -153,19 +154,19 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 更新自动应答规则
+        /// Updates the auto-reply rules.
         /// </summary>
-        /// <param name="rules">规则列表，可为 null</param>
+        /// <param name="rules">Rule list; may be null.</param>
         public void SetRules(List<AutoReplyRule> rules)
         {
             _replyEngine.UpdateRules(rules);
         }
 
         /// <summary>
-        /// 设置监听地址 —— 仅在没有任何端口处于监听状态时生效
+        /// Sets the listening address - only effective while no port is listening.
         /// </summary>
-        /// <param name="listenIp">监听地址</param>
-        /// <returns>设置成功返回 true</returns>
+        /// <param name="listenIp">Listening address.</param>
+        /// <returns>true when the setting succeeded.</returns>
         public bool SetListenIp(string listenIp)
         {
             if (!ValidationHelper.IsValidIpAddress(listenIp))
@@ -179,7 +180,7 @@ namespace TcpServer.BLL
                 {
                     if (pair.Value != null && pair.Value.IsListening)
                     {
-                        // 已有端口在监听，地址不可变更
+                        // A port is already listening, so the address cannot be changed.
                         return false;
                     }
                 }
@@ -200,13 +201,13 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 启停控制
+        #region Start / Stop Control
 
         /// <summary>
-        /// 启动全部启用的端口
+        /// Starts every enabled port.
         /// </summary>
-        /// <param name="message">结果汇总描述</param>
-        /// <returns>至少成功启动一个端口返回 true</returns>
+        /// <param name="message">Result summary description.</param>
+        /// <returns>true when at least one port started successfully.</returns>
         public bool StartAll(out string message)
         {
             message = string.Empty;
@@ -267,7 +268,7 @@ namespace TcpServer.BLL
 
             if (failDetails.Count > 0)
             {
-                message += " Failed ports: " + string.Join("、", failDetails.ToArray());
+                message += " Failed ports: " + string.Join(", ", failDetails.ToArray());
             }
 
             LogHelper.Instance.Info(message);
@@ -275,7 +276,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 停止全部端口
+        /// Stops every port.
         /// </summary>
         public void StopAll()
         {
@@ -297,11 +298,11 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 启动单个端口
+        /// Starts a single port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="message">结果描述</param>
-        /// <returns>启动成功返回 true</returns>
+        /// <param name="port">Port number.</param>
+        /// <param name="message">Result description.</param>
+        /// <returns>true when the start succeeded.</returns>
         public bool StartPort(int port, out string message)
         {
             message = string.Empty;
@@ -317,9 +318,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 停止单个端口
+        /// Stops a single port.
         /// </summary>
-        /// <param name="port">端口号</param>
+        /// <param name="port">Port number.</param>
         public void StopPort(int port)
         {
             PortListener listener = FindListener(port);
@@ -337,16 +338,16 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 数据收发
+        #region Data Transfer
 
         /// <summary>
-        /// 向指定端口的指定客户端发送数据
+        /// Sends data to a specific client on the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="sessionId">会话标识</param>
-        /// <param name="data">待发送数据</param>
-        /// <param name="error">失败原因</param>
-        /// <returns>发送成功返回 true</returns>
+        /// <param name="port">Port number.</param>
+        /// <param name="sessionId">Session identifier.</param>
+        /// <param name="data">Data to send.</param>
+        /// <param name="error">Failure reason.</param>
+        /// <returns>true when the send succeeded.</returns>
         public bool SendToClient(int port, string sessionId, byte[] data, out string error)
         {
             error = string.Empty;
@@ -362,12 +363,12 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 向指定端口的所有在线客户端广播数据
+        /// Broadcasts data to every client online on the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="data">待发送数据</param>
-        /// <param name="error">失败原因</param>
-        /// <returns>成功发送的客户端数量</returns>
+        /// <param name="port">Port number.</param>
+        /// <param name="data">Data to send.</param>
+        /// <param name="error">Failure reason.</param>
+        /// <returns>Number of clients the data was sent to successfully.</returns>
         public int SendToAllClients(int port, byte[] data, out string error)
         {
             error = string.Empty;
@@ -384,12 +385,12 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 状态查询
+        #region State Query
 
         /// <summary>
-        /// 获取全部端口的运行时状态（与配置顺序一致）
+        /// Gets the runtime state of every port (in configuration order).
         /// </summary>
-        /// <returns>状态集合，永不为 null</returns>
+        /// <returns>State collection, never null.</returns>
         public List<PortRuntimeInfo> GetRuntimeInfos()
         {
             List<PortRuntimeInfo> result = new List<PortRuntimeInfo>();
@@ -410,10 +411,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取指定端口的运行时状态
+        /// Gets the runtime state of the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <returns>状态对象，永不为 null</returns>
+        /// <param name="port">Port number.</param>
+        /// <returns>State object, never null.</returns>
         public PortRuntimeInfo GetRuntimeInfo(int port)
         {
             PortConfig cfg = FindConfig(port);
@@ -436,10 +437,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取指定端口的在线客户端列表
+        /// Gets the list of clients online on the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <returns>客户端集合，永不为 null</returns>
+        /// <param name="port">Port number.</param>
+        /// <returns>Client collection, never null.</returns>
         public List<ClientInfo> GetClientList(int port)
         {
             PortListener listener = FindListener(port);
@@ -453,10 +454,11 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 释放
+        #region Dispose
 
         /// <summary>
-        /// 释放资源 —— 会先停止全部监听（规约：退出前检查设备是否仍在连接并调用关闭方法）
+        /// Releases resources - stops all listeners first
+        /// (convention: before exiting, check whether devices are still connected and call close methods).
         /// </summary>
         public void Dispose()
         {
@@ -494,14 +496,14 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 私有方法
+        #region Private Methods
 
         /// <summary>
-        /// 获取或创建指定端口的监听器
+        /// Gets or creates the listener for the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="cfg">对应的配置（可为 null）</param>
-        /// <returns>监听器实例，永不为 null</returns>
+        /// <param name="port">Port number.</param>
+        /// <param name="cfg">Corresponding configuration (may be null).</param>
+        /// <returns>Listener instance, never null.</returns>
         private PortListener GetOrCreateListener(int port, PortConfig cfg)
         {
             lock (_lockObj)
@@ -509,7 +511,7 @@ namespace TcpServer.BLL
                 PortListener listener;
                 if (_listeners.TryGetValue(port, out listener) && listener != null)
                 {
-                    // 地址已变更且未在监听时同步过去
+                    // Synchronize the address over when it changed and the listener is not listening.
                     if (!listener.IsListening)
                     {
                         listener.ChangeListenIp(_listenIp);
@@ -530,10 +532,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 查找指定端口的监听器
+        /// Finds the listener for the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <returns>监听器；不存在时返回 null</returns>
+        /// <param name="port">Port number.</param>
+        /// <returns>Listener; null when it does not exist.</returns>
         private PortListener FindListener(int port)
         {
             lock (_lockObj)
@@ -544,10 +546,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 查找指定端口的配置
+        /// Finds the configuration for the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <returns>配置；不存在时返回 null</returns>
+        /// <param name="port">Port number.</param>
+        /// <returns>Configuration; null when it does not exist.</returns>
         private PortConfig FindConfig(int port)
         {
             lock (_lockObj)
@@ -565,9 +567,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 获取监听器快照
+        /// Gets a listener snapshot.
         /// </summary>
-        /// <returns>监听器集合，永不为 null</returns>
+        /// <returns>Listener collection, never null.</returns>
         private List<PortListener> GetListenerSnapshot()
         {
             List<PortListener> snapshot = new List<PortListener>();
@@ -584,7 +586,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 端口状态变化 —— 转发事件
+        /// Port state changed - forwards the event.
         /// </summary>
         private void OnListenerStateChanged(object sender, PortStateChangedEventArgs e)
         {
@@ -596,7 +598,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 客户端上下线 —— 转发事件
+        /// Client online / offline - forwards the event.
         /// </summary>
         private void OnListenerClientChanged(object sender, ClientChangedEventArgs e)
         {
@@ -608,7 +610,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 收到数据 —— 转发事件并触发自动应答
+        /// Data received - forwards the event and triggers auto-reply.
         /// </summary>
         private void OnListenerDataReceived(object sender, PortDataEventArgs e)
         {
@@ -625,7 +627,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 发出数据 —— 转发事件
+        /// Data sent - forwards the event.
         /// </summary>
         private void OnListenerDataSent(object sender, PortDataEventArgs e)
         {
@@ -640,9 +642,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 尝试自动应答 —— 命中规则时异步回发，避免阻塞接收线程
+        /// Attempts an auto-reply - on a rule hit, replies asynchronously to avoid blocking the receive thread.
         /// </summary>
-        /// <param name="e">收到的数据事件参数</param>
+        /// <param name="e">Data received event arguments.</param>
         private void TryAutoReply(PortDataEventArgs e)
         {
             if (e == null || e.Direction != DataDirection.Received) { return; }

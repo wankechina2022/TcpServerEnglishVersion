@@ -7,15 +7,16 @@ using System.Net.Sockets;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 网络帮助类 —— 本机地址枚举、端口占用探测（规约：写入前先做网络连通性检查）
+    /// Network helper - local address enumeration and port occupancy probing
+    /// (convention: always run a network connectivity check before binding).
     /// </summary>
     public static class NetHelper
     {
         /// <summary>
-        /// 获取界面下拉框可选的监听地址列表
-        /// 顺序：127.0.0.1 → 0.0.0.0 → 本机各网卡 IPv4 地址
+        /// Gets the list of listening addresses available to the UI drop-down.
+        /// Order: 127.0.0.1 -> 0.0.0.0 -> IPv4 addresses of each local NIC.
         /// </summary>
-        /// <returns>地址清单，永不为 null</returns>
+        /// <returns>Address list, never null.</returns>
         public static List<string> GetListenAddressList()
         {
             List<string> list = new List<string>();
@@ -39,7 +40,7 @@ namespace TcpServer.Common.Helpers
                 LogHelper.Instance.Error("Failed to enumerate local listen addresses:" + ex.Message, ex);
             }
 
-            // 兜底：即使网络枚举异常，也保证至少有回环地址可选
+            // Fallback: even if network enumeration throws, keep at least the loopback address selectable.
             if (list.Count == 0)
             {
                 list.Add(AppConstants.DEFAULT_LISTEN_IP);
@@ -49,9 +50,9 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 获取本机所有网卡的 IPv4 地址（不含回环地址）
+        /// Gets the IPv4 addresses of all local NICs (loopback excluded).
         /// </summary>
-        /// <returns>IPv4 地址清单，永不为 null</returns>
+        /// <returns>IPv4 address list, never null.</returns>
         public static List<string> GetLocalIPv4List()
         {
             List<string> list = new List<string>();
@@ -71,7 +72,7 @@ namespace TcpServer.Common.Helpers
                         continue;
                     }
 
-                    // 仅统计以太网与无线网卡，跳过虚拟隧道
+                    // Only consider Ethernet and wireless adapters; skip virtual tunnels.
                     if (ni.NetworkInterfaceType == NetworkInterfaceType.Loopback
                         || ni.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
                     {
@@ -103,23 +104,24 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 探测本机某个 TCP 端口是否可被监听（是否已被占用）
+        /// Probes whether a local TCP port can be listened on (i.e. whether it is already occupied).
         /// </summary>
-        /// <param name="port">待探测端口号</param>
-        /// <returns>可监听返回 true；被占用或参数非法返回 false</returns>
+        /// <param name="port">Port number to probe.</param>
+        /// <returns>true when the port is available; false when occupied or the argument is invalid.</returns>
         public static bool IsPortAvailable(int port)
         {
             return IsPortAvailable(null, port);
         }
 
         /// <summary>
-        /// 探测指定监听地址上的某个 TCP 端口是否可被监听（2026-09-14 新增）
-        /// 说明：原实现固定用 0.0.0.0 探测，当别的程序只绑定了某一块网卡的地址时，
-        ///       会误报"端口已被占用"。改为按实际要监听的地址探测，避免误判。
+        /// Probes whether a TCP port on the specified listening address can be listened on (added 2026-09-14).
+        /// Note: the original implementation always probed with 0.0.0.0, so when another program had bound
+        ///       only one specific NIC address, it wrongly reported "port already in use". Probing with the
+        ///       address actually intended for listening avoids that false positive.
         /// </summary>
-        /// <param name="listenIp">监听地址；为空、0.0.0.0 或格式非法时按 IPAddress.Any 处理</param>
-        /// <param name="port">待探测端口号</param>
-        /// <returns>可监听返回 true；被占用或参数非法返回 false</returns>
+        /// <param name="listenIp">Listening address; empty, 0.0.0.0 or malformed values are treated as IPAddress.Any.</param>
+        /// <param name="port">Port number to probe.</param>
+        /// <returns>true when the port is available; false when occupied or the argument is invalid.</returns>
         public static bool IsPortAvailable(string listenIp, int port)
         {
             if (!ValidationHelper.IsValidPort(port))
@@ -149,12 +151,13 @@ namespace TcpServer.Common.Helpers
             {
                 if (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
                 {
-                    // 端口确实已被占用
+                    // The port genuinely is already occupied.
                     return false;
                 }
 
-                // 指定地址在本机不存在（AddressNotAvailable）等情形：
-                // 退回通配地址复核一次，避免把"地址不可用"误报成"端口被占用"
+                // Cases such as the specified address not existing on this machine (AddressNotAvailable):
+                // re-check once against the wildcard address, so that "address unavailable" is not
+                // misreported as "port occupied".
                 if (!address.Equals(IPAddress.Any) && IsPortAvailable(null, port))
                 {
                     return true;
@@ -171,7 +174,7 @@ namespace TcpServer.Common.Helpers
             }
             finally
             {
-                // 规约要求：非托管资源必须释放
+                // Convention: unmanaged resources must be released.
                 if (listener != null)
                 {
                     try { listener.Stop(); }
@@ -181,23 +184,24 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 在指定区间内探测出所有已被占用的端口
+        /// Probes all occupied ports within the specified range.
         /// </summary>
-        /// <param name="startPort">起始端口</param>
-        /// <param name="count">端口数量</param>
-        /// <returns>已被占用的端口清单，永不为 null</returns>
+        /// <param name="startPort">Start port.</param>
+        /// <param name="count">Number of ports.</param>
+        /// <returns>List of occupied ports, never null.</returns>
         public static List<int> FindOccupiedPorts(int startPort, int count)
         {
             return FindOccupiedPorts(null, startPort, count);
         }
 
         /// <summary>
-        /// 在指定区间内探测出所有已被占用的端口（按指定监听地址探测，2026-09-14 新增）
+        /// Probes all occupied ports within the specified range, probing against a given listening address
+        /// (added 2026-09-14).
         /// </summary>
-        /// <param name="listenIp">监听地址；为空时按 IPAddress.Any 处理</param>
-        /// <param name="startPort">起始端口</param>
-        /// <param name="count">端口数量</param>
-        /// <returns>已被占用的端口清单，永不为 null</returns>
+        /// <param name="listenIp">Listening address; treated as IPAddress.Any when empty.</param>
+        /// <param name="startPort">Start port.</param>
+        /// <param name="count">Number of ports.</param>
+        /// <returns>List of occupied ports, never null.</returns>
         public static List<int> FindOccupiedPorts(string listenIp, int startPort, int count)
         {
             List<int> occupied = new List<int>();

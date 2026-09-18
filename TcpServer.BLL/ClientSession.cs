@@ -8,12 +8,13 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 客户端会话 —— 封装单个 TCP 客户端的接收循环与发送逻辑
-    /// 规约要求：网络读写加锁防粘连、循环内加间隔、线程设为后台线程
+    /// Client session - encapsulates the receive loop and send logic of a single TCP client.
+    /// Convention: network reads / writes are locked against interleaving; a delay is added inside the loop;
+    ///             threads are set as background threads.
     /// </summary>
     public class ClientSession : IDisposable
     {
-        #region 字段
+        #region Fields
 
         private readonly Socket _socket;
         private readonly object _sendLock = new object();
@@ -25,30 +26,30 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 属性
+        #region Properties
 
-        /// <summary>会话唯一标识</summary>
+        /// <summary>Unique session identifier.</summary>
         public string SessionId { get; private set; }
 
-        /// <summary>所属本地监听端口</summary>
+        /// <summary>Local listening port this session belongs to.</summary>
         public int LocalPort { get; private set; }
 
-        /// <summary>客户端远端地址（IP:Port）</summary>
+        /// <summary>Client remote endpoint (IP:Port).</summary>
         public string RemoteEndPoint { get; private set; }
 
-        /// <summary>连接建立时间</summary>
+        /// <summary>Time the connection was established.</summary>
         public DateTime ConnectedTime { get; private set; }
 
-        /// <summary>累计接收字节数</summary>
+        /// <summary>Cumulative number of bytes received.</summary>
         public long BytesReceived { get; private set; }
 
-        /// <summary>累计发送字节数</summary>
+        /// <summary>Cumulative number of bytes sent.</summary>
         public long BytesSent { get; private set; }
 
-        /// <summary>最后活动时间</summary>
+        /// <summary>Last activity time.</summary>
         public DateTime LastActiveTime { get; private set; }
 
-        /// <summary>会话是否仍然有效</summary>
+        /// <summary>Whether the session is still valid.</summary>
         public bool IsConnected
         {
             get { return !_closed && !_disposed && _socket != null; }
@@ -56,29 +57,29 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 事件
+        #region Events
 
-        /// <summary>收到数据事件</summary>
+        /// <summary>Data received event.</summary>
         public event EventHandler<PortDataEventArgs> DataReceived;
 
-        /// <summary>发出数据事件</summary>
+        /// <summary>Data sent event.</summary>
         public event EventHandler<PortDataEventArgs> DataSent;
 
-        /// <summary>会话结束事件</summary>
+        /// <summary>Session closed event.</summary>
         public event EventHandler<ClientSession> SessionClosed;
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         /// <summary>
-        /// 构造函数
+        /// Constructor.
         /// </summary>
-        /// <param name="socket">已连接的客户端套接字，不能为 null</param>
-        /// <param name="localPort">所属本地监听端口</param>
-        /// <param name="sessionId">会话标识</param>
-        /// <param name="bufferSize">接收缓冲区大小</param>
-        /// <param name="ioIntervalMs">接收循环间隔毫秒数</param>
+        /// <param name="socket">Connected client socket; must not be null.</param>
+        /// <param name="localPort">Local listening port it belongs to.</param>
+        /// <param name="sessionId">Session identifier.</param>
+        /// <param name="bufferSize">Receive buffer size.</param>
+        /// <param name="ioIntervalMs">Receive loop interval in milliseconds.</param>
         public ClientSession(Socket socket, int localPort, string sessionId, int bufferSize, int ioIntervalMs)
         {
             SessionId = string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString("N") : sessionId;
@@ -108,21 +109,22 @@ namespace TcpServer.BLL
                 RemoteEndPoint = "Unknown";
             }
 
-            // 2026-09-14 新增：启用 TCP 保活探测，用于自动清理客户端断电/拔线造成的僵尸会话
+            // Added 2026-09-14: enable TCP keep-alive probing, to clean up zombie sessions caused by a client
+            // losing power or being unplugged.
             ConfigureKeepAlive();
 
-            // 2026-09-14 新增：发送超时 + 禁用 Nagle，详见方法注释
+            // Added 2026-09-14: send timeout + Nagle disabled; see the method comments for details.
             ConfigureSocketOptions();
         }
 
         #endregion
 
-        #region 对外方法
+        #region Public Methods
 
         /// <summary>
-        /// 启动接收循环（后台线程）
+        /// Starts the receive loop (background thread).
         /// </summary>
-        /// <returns>启动成功返回 true</returns>
+        /// <returns>true when the start succeeded.</returns>
         public bool StartReceive()
         {
             if (_socket == null || _closed)
@@ -146,11 +148,11 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 向该客户端发送数据（加锁防并发粘连）
+        /// Sends data to this client (locked to prevent concurrent interleaving).
         /// </summary>
-        /// <param name="data">待发送字节数组</param>
-        /// <param name="error">失败原因</param>
-        /// <returns>发送成功返回 true</returns>
+        /// <param name="data">Byte array to send.</param>
+        /// <param name="error">Failure reason.</param>
+        /// <returns>true when the send succeeded.</returns>
         public bool Send(byte[] data, out string error)
         {
             error = string.Empty;
@@ -167,7 +169,7 @@ namespace TcpServer.BLL
                 return false;
             }
 
-            // PV 操作：同一会话的发送必须串行，防止数据包粘连
+            // P / V operation: sends on the same session must be serialized to prevent packets from merging.
             lock (_sendLock)
             {
                 try
@@ -193,7 +195,8 @@ namespace TcpServer.BLL
                 }
                 catch (SocketException ex)
                 {
-                    // 2026-09-14 新增：区分"发送超时"与普通发送失败，便于现场快速判断原因
+                    // Added 2026-09-14: distinguish "send timeout" from an ordinary send failure, so the cause
+                    // can be identified quickly on site.
                     if (ex.SocketErrorCode == SocketError.TimedOut)
                     {
                         error = string.Format("Send timed out (not finished within {0} ms; the client may not be reading data)",
@@ -221,7 +224,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 关闭会话（幂等，可重复调用）
+        /// Closes the session (idempotent, may be called repeatedly).
         /// </summary>
         public void Close()
         {
@@ -258,9 +261,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 转换为客户端信息实体（供界面绑定）
+        /// Converts to a client information entity (for UI binding).
         /// </summary>
-        /// <returns>客户端信息对象，永不为 null</returns>
+        /// <returns>Client information object, never null.</returns>
         public ClientInfo ToClientInfo()
         {
             ClientInfo info = new ClientInfo();
@@ -275,7 +278,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 释放资源
+        /// Releases resources.
         /// </summary>
         public void Dispose()
         {
@@ -290,16 +293,20 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 私有方法
+        #region Private Methods
 
         /// <summary>
-        /// 配置 TCP 保活探测（2026-09-14 新增）
-        /// 用途：客户端异常断电/拔网线时不会发送 FIN 或 RST，服务端 Receive 会永久阻塞，
-        ///       会话成为"僵尸"并占用连接数上限。开启保活后，探测包无响应即判定对端失联并清理会话。
-        /// 与"空闲超时断开"的本质区别：保活探测包由对端操作系统内核直接应答，
-        ///       对端应用层无需做任何事；只要对端机器在线，即使长时间不发一个字节，连接也不会被断开，
-        ///       因此长连接完全不受影响。
-        /// 注意：Windows 默认 KeepAliveTime 为 2 小时，必须显式设置探测时间，只写 KeepAlive=true 等同未启用。
+        /// Configures TCP keep-alive probing (added 2026-09-14).
+        /// Purpose: when a client loses power or its network cable is pulled, no FIN or RST is sent, so the
+        ///          server-side Receive blocks forever and the session becomes a "zombie" occupying a slot in
+        ///          the connection limit. With keep-alive enabled, an unanswered probe marks the peer as lost
+        ///          and the session is cleaned up.
+        /// Essential difference from "disconnect on idle timeout": keep-alive probes are answered directly by
+        ///          the peer operating system kernel - the peer application layer need do nothing. As long as
+        ///          the peer machine is online, the connection is not dropped even if not a single byte is sent
+        ///          for a long time, so long-lived connections are completely unaffected.
+        /// Note: Windows defaults KeepAliveTime to 2 hours, so the probe timings must be set explicitly;
+        ///       writing only KeepAlive=true is equivalent to not enabling it.
         /// </summary>
         private void ConfigureKeepAlive()
         {
@@ -320,8 +327,9 @@ namespace TcpServer.BLL
             {
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
-                // SIO_KEEPALIVE_VALS：12 字节 = [是否启用(4B)] [空闲时间ms(4B)] [探测间隔ms(4B)]
-                // .NET Framework 未提供 TcpKeepAliveTime 系列枚举，只能用 IOControl 精细化设置
+                // SIO_KEEPALIVE_VALS: 12 bytes = [enabled(4B)] [idle time ms(4B)] [probe interval ms(4B)]
+                // .NET Framework offers no TcpKeepAliveTime enumeration, so IOControl is the only way to set
+                // these precisely.
                 byte[] optionValues = new byte[12];
                 BitConverter.GetBytes((uint)1).CopyTo(optionValues, 0);
                 BitConverter.GetBytes((uint)idleMs).CopyTo(optionValues, 4);
@@ -331,7 +339,8 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                // 保活设置失败不影响正常收发，仅记录告警，避免因个别环境不支持而中断连接建立
+                // A failed keep-alive setting does not affect normal traffic; only a warning is logged, so an
+                // unsupported environment does not prevent connections from being established.
                 LogHelper.Instance.Warn(string.Format(
                     "Port {0} client {1}: failed to set TCP keep-alive, connection still usable: {2}",
                     LocalPort, RemoteEndPoint, ex.Message));
@@ -339,17 +348,20 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 配置套接字发送行为（2026-09-14 新增）
+        /// Configures socket send behaviour (added 2026-09-14).
         ///
-        /// 1) SendTimeout —— 不设置时，若客户端连上后不读数据，服务端 Send 会一直阻塞到
-        ///    发送缓冲区被写满为止；而"手动发送"跑在 UI 线程上，会把整个界面卡死。
-        ///    设置超时后到点即抛 SocketException(TimedOut) 自行退出，界面不会被拖住。
+        /// 1) SendTimeout - when unset, if a client connects but never reads, the server-side Send blocks
+        ///    until the send buffer is full; and "manual send" runs on the UI thread, which would freeze the
+        ///    whole interface. With a timeout, a SocketException(TimedOut) is thrown at that point and the
+        ///    call exits on its own, so the interface is not dragged down.
         ///
-        /// 2) NoDelay —— 关闭 Nagle 算法。Nagle 会把连续的小包合并后发送，
-        ///    调试时看到的接收时序与真实发送时序不一致；调试工具需要真实时序，故关闭。
+        /// 2) NoDelay - disables the Nagle algorithm. Nagle merges consecutive small packets before sending,
+        ///    so the receive timing observed while debugging differs from the real send timing; a debugging
+        ///    tool needs the real timing, hence this is disabled.
         ///
-        /// 注意：这里刻意不设置 ReceiveTimeout —— 长连接可能长时间没有数据往来，
-        ///       一旦设置空闲超时会把"在线但空闲"的长连接误杀，这正是要避免的。
+        /// Note: ReceiveTimeout is deliberately not set here - a long-lived connection may go a long time
+        ///       without any traffic, and setting an idle timeout would wrongly kill an "online but idle"
+        ///       long-lived connection, which is exactly what must be avoided.
         /// </summary>
         private void ConfigureSocketOptions()
         {
@@ -364,7 +376,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                // 个别平台/协议栈不支持 NoDelay，不影响收发
+                // Some platforms / protocol stacks do not support NoDelay; traffic is unaffected.
                 LogHelper.Instance.Warn(string.Format(
                     "Port {0} client {1}: failed to set NoDelay, connection still usable: {2}",
                     LocalPort, RemoteEndPoint, ex.Message));
@@ -380,7 +392,7 @@ namespace TcpServer.BLL
             }
             catch (Exception ex)
             {
-                // 发送超时设置失败不影响正常收发，仅告警
+                // A failed send timeout setting does not affect normal traffic; only a warning is logged.
                 LogHelper.Instance.Warn(string.Format(
                     "Port {0} client {1}: failed to set send timeout, connection still usable: {2}",
                     LocalPort, RemoteEndPoint, ex.Message));
@@ -388,7 +400,7 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 接收循环 —— 阻塞接收，收到数据后触发事件
+        /// Receive loop - blocks on receive and raises an event once data arrives.
         /// </summary>
         private void ReceiveLoop()
         {
@@ -424,7 +436,7 @@ namespace TcpServer.BLL
                     break;
                 }
 
-                // 返回 0 表示对端已正常关闭
+                // A return value of 0 means the peer closed the connection normally.
                 if (received <= 0)
                 {
                     break;
@@ -433,12 +445,12 @@ namespace TcpServer.BLL
                 BytesReceived += received;
                 LastActiveTime = DateTime.Now;
 
-                // 复制数据后再抛出事件，避免缓冲区被下一轮接收覆盖
+                // Copy the data before raising the event, so the buffer is not overwritten by the next receive.
                 byte[] copy = new byte[received];
                 Buffer.BlockCopy(buffer, 0, copy, 0, received);
                 RaiseDataReceived(copy, received);
 
-                // 规约要求：循环内加时间间隔，降低数据粘连概率
+                // Convention: add a time interval inside the loop to reduce the probability of data merging.
                 if (_ioIntervalMs > 0)
                 {
                     try { Thread.Sleep(_ioIntervalMs); }
@@ -446,7 +458,7 @@ namespace TcpServer.BLL
                 }
             }
 
-            // 循环退出即视为连接结束
+            // Exiting the loop counts as the connection ending.
             if (!_closed)
             {
                 LogHelper.Instance.Info(string.Format("Port {0}: client {1} disconnected.", LocalPort, RemoteEndPoint));
@@ -455,10 +467,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 触发收到数据事件（异常不外泄）
+        /// Raises the data received event (exceptions do not escape).
         /// </summary>
-        /// <param name="data">数据</param>
-        /// <param name="length">有效长度</param>
+        /// <param name="data">Data.</param>
+        /// <param name="length">Effective length.</param>
         private void RaiseDataReceived(byte[] data, int length)
         {
             EventHandler<PortDataEventArgs> handler = DataReceived;
@@ -476,10 +488,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 触发发出数据事件（异常不外泄）
+        /// Raises the data sent event (exceptions do not escape).
         /// </summary>
-        /// <param name="data">数据</param>
-        /// <param name="length">有效长度</param>
+        /// <param name="data">Data.</param>
+        /// <param name="length">Effective length.</param>
         private void RaiseDataSent(byte[] data, int length)
         {
             EventHandler<PortDataEventArgs> handler = DataSent;

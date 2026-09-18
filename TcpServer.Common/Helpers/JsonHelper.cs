@@ -4,12 +4,13 @@ using Newtonsoft.Json;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// JSON 序列化帮助类 —— 统一封装 Newtonsoft.Json，所有方法均做异常兜底
+    /// JSON serialization helper - wraps Newtonsoft.Json consistently; every method has exception fallback.
     /// </summary>
     public static class JsonHelper
     {
         /// <summary>
-        /// 序列化设置 —— 忽略空值、忽略缺失成员，保证旧配置可被新版本读取
+        /// Serialization settings - ignore null values and ignore missing members,
+        /// so old configuration files can still be read by newer versions.
         /// </summary>
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
         {
@@ -19,11 +20,11 @@ namespace TcpServer.Common.Helpers
         };
 
         /// <summary>
-        /// 将对象序列化为 JSON 字符串
+        /// Serializes an object to a JSON string.
         /// </summary>
-        /// <param name="obj">待序列化对象，为 null 时返回空串</param>
-        /// <param name="indented">是否格式化缩进（便于人工查看配置文件）</param>
-        /// <returns>JSON 字符串；失败时返回空串</returns>
+        /// <param name="obj">Object to serialize; returns an empty string when null.</param>
+        /// <param name="indented">Whether to format with indentation (easier for humans to read the config file).</param>
+        /// <returns>JSON string; an empty string on failure.</returns>
         public static string Serialize(object obj, bool indented = true)
         {
             if (obj == null)
@@ -46,12 +47,12 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 将 JSON 字符串反序列化为指定类型
+        /// Deserializes a JSON string into the specified type.
         /// </summary>
-        /// <typeparam name="T">目标类型（必须是引用类型）</typeparam>
-        /// <param name="json">JSON 字符串</param>
-        /// <param name="defaultValue">解析失败时返回的默认值，可为 null</param>
-        /// <returns>反序列化结果；失败时返回 defaultValue</returns>
+        /// <typeparam name="T">Target type (must be a reference type).</typeparam>
+        /// <param name="json">JSON string.</param>
+        /// <param name="defaultValue">Default value returned when parsing fails; may be null.</param>
+        /// <returns>Deserialization result; returns defaultValue on failure.</returns>
         public static T Deserialize<T>(string json, T defaultValue = null) where T : class
         {
             T result;
@@ -64,12 +65,12 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 尝试将 JSON 字符串反序列化为指定类型
+        /// Attempts to deserialize a JSON string into the specified type.
         /// </summary>
-        /// <typeparam name="T">目标类型（必须是引用类型）</typeparam>
-        /// <param name="json">JSON 字符串</param>
-        /// <param name="result">反序列化结果</param>
-        /// <returns>成功返回 true；失败返回 false 并输出 null</returns>
+        /// <typeparam name="T">Target type (must be a reference type).</typeparam>
+        /// <param name="json">JSON string.</param>
+        /// <param name="result">Deserialization result.</param>
+        /// <returns>true on success; false on failure with result set to null.</returns>
         public static bool TryDeserialize<T>(string json, out T result) where T : class
         {
             result = null;

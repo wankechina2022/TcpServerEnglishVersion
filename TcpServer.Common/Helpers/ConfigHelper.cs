@@ -4,13 +4,14 @@ using System.Configuration;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 配置读取帮助类 —— 统一读取 App.config 中的只读运行参数
-    /// 规约约定：配置文件数据只读取不反写；可反写的业务参数由 DAL 层单独持久化
+    /// Configuration reading helper - centralizes reading of read-only runtime parameters from App.config.
+    /// Convention: configuration file data is read-only and never written back; writable business parameters
+    ///             are persisted separately by the DAL layer.
     /// </summary>
     public static class ConfigHelper
     {
         /// <summary>
-        /// 默认监听地址（默认 127.0.0.1）
+        /// Default listening address (default 127.0.0.1).
         /// </summary>
         public static string DefaultListenIp
         {
@@ -18,7 +19,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 默认起始端口（默认 60000）
+        /// Default starting port (default 60000).
         /// </summary>
         public static int DefaultStartPort
         {
@@ -34,7 +35,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 日志保留月数（默认 6 个月）
+        /// Log retention in months (default 6 months).
         /// </summary>
         public static int LogKeepMonths
         {
@@ -46,7 +47,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 接收缓冲区大小（字节，默认 8192）
+        /// Receive buffer size (bytes, default 8192).
         /// </summary>
         public static int ReceiveBufferSize
         {
@@ -62,7 +63,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 网络读写最小间隔（毫秒，默认 20）
+        /// Minimum network read / write interval (milliseconds, default 20).
         /// </summary>
         public static int IoMinIntervalMs
         {
@@ -78,7 +79,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 是否在启动时自动开始监听（默认 false，避免误占端口）
+        /// Whether to start listening automatically at launch (default false, to avoid occupying ports by accident).
         /// </summary>
         public static bool AutoStartOnLaunch
         {
@@ -86,7 +87,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 是否启用 TCP 保活探测（2026-09-14 新增，默认 true）
+        /// Whether to enable TCP keep-alive probing (added 2026-09-14, default true).
         /// </summary>
         public static bool KeepAliveEnabled
         {
@@ -94,7 +95,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// TCP 保活探测启动前的空闲秒数（2026-09-14 新增，默认 15 秒，有效范围 1~7200）
+        /// Idle seconds before TCP keep-alive probing starts (added 2026-09-14, default 15 seconds, valid range 1~7200).
         /// </summary>
         public static int KeepAliveIdleSeconds
         {
@@ -110,7 +111,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// TCP 保活探测的间隔秒数（2026-09-14 新增，默认 3 秒，有效范围 1~300）
+        /// Interval in seconds between TCP keep-alive probes (added 2026-09-14, default 3 seconds, valid range 1~300).
         /// </summary>
         public static int KeepAliveIntervalSeconds
         {
@@ -126,8 +127,8 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 发送超时毫秒数（2026-09-14 新增，默认 10000，有效范围 500~600000）
-        /// 设为 0 表示不限制（不推荐：客户端不读数据时会让界面卡死）
+        /// Send timeout in milliseconds (added 2026-09-14, default 10000, valid range 500~600000).
+        /// A value of 0 means unlimited (not recommended: the interface will freeze when the client stops reading).
         /// </summary>
         public static int SendTimeoutMs
         {
@@ -147,7 +148,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 单个日志文件大小上限（字节，2026-09-14 新增，默认 20MB，有效范围 1MB~2GB）
+        /// Maximum size of a single log file (bytes, added 2026-09-14, default 20MB, valid range 1MB~2GB).
         /// </summary>
         public static long LogMaxFileSize
         {
@@ -163,7 +164,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 日志异步写入队列最大长度（2026-09-14 新增，默认 20000，有效范围 1000~1000000）
+        /// Maximum length of the asynchronous log write queue (added 2026-09-14, default 20000, valid range 1000~1000000).
         /// </summary>
         public static int LogQueueMaxLength
         {
@@ -179,7 +180,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 配置备份文件保留份数（2026-09-14 新增，默认 20，有效范围 1~1000）
+        /// Number of configuration backup files to keep (added 2026-09-14, default 20, valid range 1~1000).
         /// </summary>
         public static int ConfigBackupKeepCount
         {
@@ -195,8 +196,9 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 监听线程看门狗巡检间隔毫秒数（2026-09-14 新增，默认 5000，有效范围 1000~60000）
-        /// 设为 0 表示关闭看门狗
+        /// Watchdog inspection interval for the listener thread in milliseconds
+        /// (added 2026-09-14, default 5000, valid range 1000~60000).
+        /// A value of 0 disables the watchdog.
         /// </summary>
         public static int WatchdogIntervalMs
         {
@@ -216,8 +218,9 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 日志定期清理的巡检间隔小时数（2026-09-14 新增，默认 24，有效范围 1~8760）
-        /// 设为 0 表示关闭定期清理（仅保留启动时清理一次）
+        /// Inspection interval in hours for periodic log cleanup
+        /// (added 2026-09-14, default 24, valid range 1~8760).
+        /// A value of 0 disables periodic cleanup (leaving only the once-at-startup cleanup).
         /// </summary>
         public static int LogCleanupIntervalHours
         {
@@ -237,11 +240,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 获取字符串型配置项
+        /// Reads a string configuration item.
         /// </summary>
-        /// <param name="key">配置键名</param>
-        /// <param name="defaultValue">缺省值</param>
-        /// <returns>配置值；未配置或为空时返回缺省值</returns>
+        /// <param name="key">Configuration key.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Configuration value; returns the default when unset or empty.</returns>
         public static string GetStringConfig(string key, string defaultValue = "")
         {
             try
@@ -262,11 +265,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 获取整型配置项
+        /// Reads an integer configuration item.
         /// </summary>
-        /// <param name="key">配置键名</param>
-        /// <param name="defaultValue">缺省值</param>
-        /// <returns>配置值；解析失败时返回缺省值</returns>
+        /// <param name="key">Configuration key.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Configuration value; returns the default when parsing fails.</returns>
         public static int GetIntConfig(string key, int defaultValue = 0)
         {
             string value = GetStringConfig(key, string.Empty);
@@ -275,11 +278,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 获取布尔型配置项
+        /// Reads a boolean configuration item.
         /// </summary>
-        /// <param name="key">配置键名</param>
-        /// <param name="defaultValue">缺省值</param>
-        /// <returns>配置值；解析失败时返回缺省值</returns>
+        /// <param name="key">Configuration key.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Configuration value; returns the default when parsing fails.</returns>
         public static bool GetBoolConfig(string key, bool defaultValue = false)
         {
             string value = GetStringConfig(key, string.Empty);
@@ -288,11 +291,12 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 获取长整型配置项（2026-09-14 新增，用于文件大小等大数值配置）
+        /// Reads a long integer configuration item
+        /// (added 2026-09-14, for large numeric values such as file sizes).
         /// </summary>
-        /// <param name="key">配置键名</param>
-        /// <param name="defaultValue">缺省值</param>
-        /// <returns>配置值；解析失败时返回缺省值</returns>
+        /// <param name="key">Configuration key.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Configuration value; returns the default when parsing fails.</returns>
         public static long GetLongConfig(string key, long defaultValue = 0L)
         {
             string value = GetStringConfig(key, string.Empty);

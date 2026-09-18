@@ -7,23 +7,27 @@ using System.Threading;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 日志工具类 —— 支持文件日志与控制台输出
-    /// 规约要求：每天一个日志文件；默认保留 6 个月，超期自动删除；所有异常必须记录日志
+    /// Logging utility - supports file logging and console output.
+    /// Convention: one log file per day; files are kept for 6 months by default and expired ones are deleted
+    ///             automatically; every exception must be logged.
     ///
-    /// 2026-09-14 改造说明（三处）：
-    /// 1) 原先每写一行日志都要"开文件→写→关文件"，且系统日志与端口流水共用一把锁；
-    ///    20 个端口同时高频收发时，接收线程会全部串行阻塞在文件 IO 上。
-    ///    现改为"业务线程只入队、专职写线程负责落盘"，落盘期间持有文件句柄不再反复开关，
-    ///    接收线程不再等待磁盘。
-    /// 2) 单个日志文件原先没有大小上限，长时间高频收发会无限增长；
-    ///    现超过上限后自动滚动为 xxx_1.log、xxx_2.log 分卷，清理规则仍按保留月数统一执行。
-    /// 3) 清理原先只在程序启动时执行一次，程序长期不关闭（如常驻现场）则永远不会清理；
-    ///    现增加专职清理线程按 LogCleanupIntervalHours 周期执行（默认 24 小时），
-    ///    停止时用 ManualResetEventSlim 立即唤醒，不白等一个完整周期。
+    /// 2026-09-14 rework notes (three points):
+    /// 1) Previously every log line meant "open file -> write -> close file", and system logs shared a single
+    ///    lock with port traffic logs; with 20 ports sending and receiving at high frequency, all receive
+    ///    threads blocked serially on file IO. It now works as "business threads only enqueue; a dedicated
+    ///    writer thread persists to disk", the file handle is held open during writes instead of being
+    ///    repeatedly opened and closed, and receive threads no longer wait on the disk.
+    /// 2) A single log file previously had no size cap and grew without limit under long, high-frequency
+    ///    traffic; once the cap is exceeded it now rolls over automatically into xxx_1.log / xxx_2.log
+    ///    volumes, while cleanup still follows the retention-month rule uniformly.
+    /// 3) Cleanup previously ran only once at startup, so a program that stayed up for a long time (for
+    ///    example a permanent on-site deployment) never cleaned anything; a dedicated cleanup thread now
+    ///    runs periodically at LogCleanupIntervalHours (default 24 hours), and on stop a ManualResetEventSlim
+    ///    wakes it immediately instead of sitting idle for a whole period.
     /// </summary>
     public sealed class LogHelper
     {
-        #region 单例与字段
+        #region Singleton and Fields
 
         private static readonly LogHelper _instance = new LogHelper();
 
@@ -33,12 +37,12 @@ namespace TcpServer.Common.Helpers
         private readonly Dictionary<string, StreamWriter> _writers = new Dictionary<string, StreamWriter>();
         private readonly Thread _writerThread;
 
-        /// <summary>专职日志清理线程（2026-09-14 新增）</summary>
+        /// <summary>Dedicated log cleanup thread (added 2026-09-14).</summary>
         private readonly Thread _cleanupThread;
 
         /// <summary>
-        /// 清理线程唤醒信号（2026-09-14 新增）
-        /// 用途：停止时立即唤醒休眠中的清理线程，避免白等一个完整巡检周期
+        /// Cleanup thread wake-up signal (added 2026-09-14).
+        /// Purpose: wake a sleeping cleanup thread immediately on stop, instead of waiting out a whole inspection period.
         /// </summary>
         private readonly ManualResetEventSlim _cleanupWakeup = new ManualResetEventSlim(false);
 
@@ -46,10 +50,10 @@ namespace TcpServer.Common.Helpers
 
         private volatile bool _shutdownRequested;
 
-        /// <summary>清理线程的运行标志（2026-09-14 新增）</summary>
+        /// <summary>Running flag of the cleanup thread (added 2026-09-14).</summary>
         private volatile bool _cleanupRunning;
 
-        /// <summary>当前生效的日志保留月数（2026-09-14 新增，供清理线程复用）</summary>
+        /// <summary>Currently effective log retention in months (added 2026-09-14, reused by the cleanup thread).</summary>
         private int _cleanupKeepMonths;
         private bool _consoleOutputEnabled;
 
@@ -57,7 +61,7 @@ namespace TcpServer.Common.Helpers
         private int _maxQueueLength;
         private long _droppedCount;
 
-        /// <summary>日志级别</summary>
+        /// <summary>Log level.</summary>
         public enum LogLevel
         {
             DEBUG = 0,
@@ -68,24 +72,25 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 待写日志条目（2026-09-14 新增，仅内部使用）
+        /// A pending log entry (added 2026-09-14, internal use only).
         /// </summary>
         private sealed class LogEntry
         {
-            /// <summary>目标文件绝对路径</summary>
+            /// <summary>Absolute path of the target file.</summary>
             public string FilePath;
 
-            /// <summary>日志正文</summary>
+            /// <summary>Log body.</summary>
             public string Content;
         }
 
         #endregion
 
-        #region 构造与单例
+        #region Constructor and Singleton
 
         /// <summary>
-        /// 私有构造函数 —— 创建日志目录并启动专职写线程
-        /// 注意：构造函数内不得读取 App.config（避免配置读取异常时回调本类导致单例尚未就绪）
+        /// Private constructor - creates the log directory and starts the dedicated writer thread.
+        /// Note: App.config must not be read inside the constructor (a configuration read exception could
+        ///       call back into this class while the singleton is not yet ready).
         /// </summary>
         private LogHelper()
         {
@@ -108,7 +113,8 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 日志目录创建失败时不允许影响主流程，静默降级为仅控制台输出
+                // A failure to create the log directory must not affect the main flow;
+                // silently degrade to console-only output.
                 _consoleOutputEnabled = true;
             }
 
@@ -117,14 +123,16 @@ namespace TcpServer.Common.Helpers
             _writerThread.Name = "LogWriter";
             _writerThread.Start();
 
-            // 定期清理线程（2026-09-14 新增）：跑完就退出，不常驻。
-            // 只解决"启动时清一次、之后永不再清"的缺口；间隔为 0 时本线程立刻结束。
+            // Periodic cleanup thread (added 2026-09-14): exits after finishing, not permanent.
+            // It only closes the gap of "clean once at startup, then never again"; an interval of 0 ends
+            // this thread immediately.
             _cleanupThread = new Thread(CleanupLoop);
             _cleanupThread.IsBackground = true;
             _cleanupThread.Name = "LogCleaner";
             _cleanupThread.Start();
 
-            // 进程退出时把队列里剩余的日志落盘，避免最后几条丢失（2026-09-14 新增）
+            // Flush the remaining queued logs on process exit so the last few entries are not lost
+            // (added 2026-09-14).
             try
             {
                 AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
@@ -132,12 +140,12 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 事件注册失败不影响日志功能
+                // A failure to register the event does not affect logging.
             }
         }
 
         /// <summary>
-        /// 获取日志工具单例
+        /// Gets the logging utility singleton.
         /// </summary>
         public static LogHelper Instance
         {
@@ -145,7 +153,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 日志目录绝对路径
+        /// Absolute path of the log directory.
         /// </summary>
         public string LogDirectory
         {
@@ -153,7 +161,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 当前待落盘的日志条数（2026-09-14 新增，供诊断用）
+        /// Number of logs currently waiting to be persisted (added 2026-09-14, for diagnostics).
         /// </summary>
         public int PendingCount
         {
@@ -167,8 +175,8 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 定期清理线程是否正在运行（2026-09-14 新增，供诊断用）
-        /// 说明：间隔配置为 0 时该线程会立即结束，此处返回 false
+        /// Whether the periodic cleanup thread is running (added 2026-09-14, for diagnostics).
+        /// Note: when the interval is configured as 0 this thread ends immediately, and this returns false.
         /// </summary>
         public bool CleanupRunning
         {
@@ -177,14 +185,14 @@ namespace TcpServer.Common.Helpers
 
         #endregion
 
-        #region 对外方法
+        #region Public Methods
 
         /// <summary>
-        /// 记录日志
+        /// Writes a log entry.
         /// </summary>
-        /// <param name="level">日志级别</param>
-        /// <param name="message">日志内容，允许为 null</param>
-        /// <param name="ex">异常对象，可为 null</param>
+        /// <param name="level">Log level.</param>
+        /// <param name="message">Log content; null is allowed.</param>
+        /// <param name="ex">Exception object; may be null.</param>
         public void Log(LogLevel level, string message, Exception ex = null)
         {
             string logContent = string.Format("[{0:yyyy-MM-dd HH:mm:ss.fff}] [{1}] {2}",
@@ -204,7 +212,7 @@ namespace TcpServer.Common.Helpers
                 }
                 catch (Exception)
                 {
-                    // 控制台输出失败不影响文件日志
+                    // A console output failure does not affect file logging.
                 }
             }
 
@@ -214,34 +222,35 @@ namespace TcpServer.Common.Helpers
             Enqueue(Path.Combine(_logDirectory, fileName), logContent + "\r\n\r\n");
         }
 
-        /// <summary>记录 DEBUG 级别日志</summary>
-        /// <param name="message">日志内容</param>
+        /// <summary>Writes a DEBUG-level log entry.</summary>
+        /// <param name="message">Log content.</param>
         public void Debug(string message) { Log(LogLevel.DEBUG, message); }
 
-        /// <summary>记录 INFO 级别日志</summary>
-        /// <param name="message">日志内容</param>
+        /// <summary>Writes an INFO-level log entry.</summary>
+        /// <param name="message">Log content.</param>
         public void Info(string message) { Log(LogLevel.INFO, message); }
 
-        /// <summary>记录 WARN 级别日志</summary>
-        /// <param name="message">日志内容</param>
+        /// <summary>Writes a WARN-level log entry.</summary>
+        /// <param name="message">Log content.</param>
         public void Warn(string message) { Log(LogLevel.WARN, message); }
 
-        /// <summary>记录 ERROR 级别日志</summary>
-        /// <param name="message">日志内容</param>
-        /// <param name="ex">异常对象，可为 null</param>
+        /// <summary>Writes an ERROR-level log entry.</summary>
+        /// <param name="message">Log content.</param>
+        /// <param name="ex">Exception object; may be null.</param>
         public void Error(string message, Exception ex = null) { Log(LogLevel.ERROR, message, ex); }
 
-        /// <summary>记录 FATAL 级别日志</summary>
-        /// <param name="message">日志内容</param>
-        /// <param name="ex">异常对象，可为 null</param>
+        /// <summary>Writes a FATAL-level log entry.</summary>
+        /// <param name="message">Log content.</param>
+        /// <param name="ex">Exception object; may be null.</param>
         public void Fatal(string message, Exception ex = null) { Log(LogLevel.FATAL, message, ex); }
 
         /// <summary>
-        /// 按指定端口写一份收发流水日志 —— 每个端口独立文件，便于单独排查
-        /// 2026-09-14 改造：改为异步入队，调用线程不再等待磁盘写入
+        /// Writes a traffic log record for the specified port - each port gets its own file for easier
+        /// troubleshooting.
+        /// 2026-09-14 rework: switched to asynchronous enqueueing; the calling thread no longer waits on the disk.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <param name="content">流水内容</param>
+        /// <param name="port">Port number.</param>
+        /// <param name="content">Traffic content.</param>
         public void WritePortLog(int port, string content)
         {
             if (string.IsNullOrEmpty(content)) { return; }
@@ -253,15 +262,15 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 流水日志写入失败不影响收发主流程
+                // A failure to write the traffic log does not affect the main send / receive flow.
             }
         }
 
         /// <summary>
-        /// 获取指定端口当天的流水日志文件路径
+        /// Gets today's traffic log file path for the specified port.
         /// </summary>
-        /// <param name="port">端口号</param>
-        /// <returns>日志文件绝对路径</returns>
+        /// <param name="port">Port number.</param>
+        /// <returns>Absolute log file path.</returns>
         public string GetPortLogFilePath(int port)
         {
             string fileName = string.Format("Port_{0}_{1:yyyyMMdd}.log", port, DateTime.Now);
@@ -269,10 +278,10 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 等待队列中的日志全部落盘（2026-09-14 新增，供退出前调用）
+        /// Waits until all queued logs have been persisted (added 2026-09-14, intended for use before exit).
         /// </summary>
-        /// <param name="timeoutMs">最长等待毫秒数</param>
-        /// <returns>队列已清空返回 true</returns>
+        /// <param name="timeoutMs">Maximum wait in milliseconds.</param>
+        /// <returns>true when the queue has been drained.</returns>
         public bool Flush(int timeoutMs = 3000)
         {
             try
@@ -295,10 +304,12 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 停止写线程并落盘剩余日志（2026-09-14 新增，进程退出时自动调用）
-        /// 2026-09-14 修改：同时唤醒并结束定期清理线程，避免退出时残留后台线程
+        /// Stops the writer thread and persists the remaining logs
+        /// (added 2026-09-14, called automatically on process exit).
+        /// 2026-09-14 change: also wakes and terminates the periodic cleanup thread,
+        /// so no background thread is left behind on exit.
         /// </summary>
-        /// <param name="timeoutMs">等待写线程结束的毫秒数</param>
+        /// <param name="timeoutMs">Milliseconds to wait for the writer thread to end.</param>
         public void Shutdown(int timeoutMs = 3000)
         {
             try
@@ -309,7 +320,7 @@ namespace TcpServer.Common.Helpers
                     Monitor.PulseAll(_queueLock);
                 }
 
-                // 先唤醒清理线程（否则它可能还在 Wait 一个完整周期）
+                // Wake the cleanup thread first (otherwise it may still be waiting out a whole period).
                 WakeupCleanup();
 
                 if (_cleanupThread != null && _cleanupThread.IsAlive
@@ -321,7 +332,7 @@ namespace TcpServer.Common.Helpers
                     }
                     catch (Exception)
                     {
-                        // 等待清理线程结束失败不影响日志落盘
+                        // A failure to wait for the cleanup thread does not affect log persistence.
                     }
                 }
 
@@ -332,13 +343,13 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 退出阶段不再抛异常
+                // No exceptions are thrown during the shutdown phase.
             }
         }
 
         /// <summary>
-        /// 立即唤醒定期清理线程（2026-09-14 新增）
-        /// 说明：异常一律吞掉，保证停止流程能完整走完
+        /// Wakes the periodic cleanup thread immediately (added 2026-09-14).
+        /// Note: all exceptions are swallowed so the stop flow always completes.
         /// </summary>
         private void WakeupCleanup()
         {
@@ -352,10 +363,12 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 定期清理线程主体（2026-09-14 新增）
-        /// 说明：本线程不在构造函数内读配置（构造期读 App.config 可能导致单例尚未就绪时回调本类），
-        ///       配置在首次循环内读取；间隔为 0 或读配置失败时按默认值处理。
-        ///       启动时的那次清理已由 Program.cs 显式调用，故本线程首轮先等满一个周期，不重复清。
+        /// Body of the periodic cleanup thread (added 2026-09-14).
+        /// Note: this thread does not read configuration inside the constructor (reading App.config during
+        ///       construction could call back into this class while the singleton is not yet ready); the
+        ///       configuration is read on the first loop iteration, and an interval of 0 or a failed read
+        ///       falls back to the default. The startup cleanup is invoked explicitly by Program.cs, so this
+        ///       thread waits out a full period first and does not clean twice.
         /// </summary>
         private void CleanupLoop()
         {
@@ -369,10 +382,10 @@ namespace TcpServer.Common.Helpers
                 }
                 catch (Exception)
                 {
-                    // 读配置失败时用默认值，不影响后续循环
+                    // Use the default when the configuration read fails; the loop continues regardless.
                 }
 
-                // 0 表示用户关闭了定期清理，直接结束本线程
+                // 0 means the user disabled periodic cleanup; end this thread immediately.
                 if (intervalHours <= 0) { return; }
 
                 _cleanupKeepMonths = ConfigHelper.LogKeepMonths;
@@ -382,7 +395,8 @@ namespace TcpServer.Common.Helpers
 
                 while (!_shutdownRequested)
                 {
-                    // 用可唤醒的等待代替 Sleep：停止时 Set() 立即返回，不白等一个完整周期
+                    // Use an interruptible wait instead of Sleep: Set() on stop returns immediately,
+                    // rather than waiting out a whole period.
                     if (_cleanupWakeup.Wait(intervalMs)) { break; }
 
                     if (_shutdownRequested) { break; }
@@ -393,14 +407,14 @@ namespace TcpServer.Common.Helpers
                     }
                     catch (Exception ex)
                     {
-                        // 单轮清理失败不影响下一轮
+                        // A single failed cleanup round does not affect the next one.
                         Log(LogLevel.WARN, "Exception in periodic log cleanup:" + ex.Message);
                     }
                 }
             }
             catch (Exception)
             {
-                // 清理线程任何异常都不允许影响主流程
+                // No exception in the cleanup thread may affect the main flow.
             }
             finally
             {
@@ -409,10 +423,10 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 清理超过保留期限的历史日志（默认 6 个月）
+        /// Cleans up historical logs older than the retention limit (6 months by default).
         /// </summary>
-        /// <param name="keepMonths">保留月数，小于 1 时使用默认值</param>
-        /// <returns>实际删除的文件数量</returns>
+        /// <param name="keepMonths">Retention in months; values below 1 use the default.</param>
+        /// <returns>Number of files actually deleted.</returns>
         public int CleanExpiredLogs(int keepMonths = AppConstants.LOG_KEEP_MONTHS)
         {
             int deletedCount = 0;
@@ -421,7 +435,8 @@ namespace TcpServer.Common.Helpers
             {
                 if (!Directory.Exists(_logDirectory)) { return 0; }
 
-                // 清理会删除文件句柄仍在使用的分卷？此处先落盘并释放全部写句柄，避免删除失败
+                // Cleanup may delete a volume whose file handle is still in use; flush and release all
+                // write handles first to avoid a failed delete.
                 FlushWriters();
 
                 int months = keepMonths < 1 ? AppConstants.LOG_KEEP_MONTHS : keepMonths;
@@ -441,7 +456,7 @@ namespace TcpServer.Common.Helpers
                     }
                     catch (Exception ex)
                     {
-                        // 单个文件删除失败不中断整体清理
+                        // A single failed file deletion does not abort the overall cleanup.
                         Log(LogLevel.WARN, string.Format("Failed to clean up historical log: {0}, reason: {1}", file, ex.Message));
                     }
                 }
@@ -461,13 +476,14 @@ namespace TcpServer.Common.Helpers
 
         #endregion
 
-        #region 私有方法 —— 入队
+        #region Private Methods - Enqueue
 
         /// <summary>
-        /// 日志入队（2026-09-14 新增）—— 仅做一次加锁入队，调用线程不碰磁盘
+        /// Enqueues a log entry (added 2026-09-14) - a single locked enqueue only; the calling thread never
+        /// touches the disk.
         /// </summary>
-        /// <param name="filePath">目标文件绝对路径</param>
-        /// <param name="content">日志正文</param>
+        /// <param name="filePath">Absolute path of the target file.</param>
+        /// <param name="content">Log body.</param>
         private void Enqueue(string filePath, string content)
         {
             if (string.IsNullOrWhiteSpace(filePath) || string.IsNullOrEmpty(content))
@@ -479,8 +495,9 @@ namespace TcpServer.Common.Helpers
             {
                 if (_maxQueueLength <= 0)
                 {
-                    // 先落兜底值再读配置：即便配置读取过程内部发生异常并回调本类，
-                    // 第二次进入时该值已 > 0，不会形成无限递归
+                    // Set the fallback value before reading configuration: even if reading the configuration
+                    // throws internally and calls back into this class, the second entry finds this value > 0
+                    // and no infinite recursion can occur.
                     _maxQueueLength = AppConstants.LOG_QUEUE_MAX_LENGTH;
 
                     int configured = ConfigHelper.LogQueueMaxLength;
@@ -493,7 +510,7 @@ namespace TcpServer.Common.Helpers
 
                 lock (_queueLock)
                 {
-                    // 队列满时丢弃最旧的日志，保护内存不被日志撑爆
+                    // When the queue is full, drop the oldest logs to keep memory from being blown up by logging.
                     while (_queue.Count >= _maxQueueLength)
                     {
                         _queue.Dequeue();
@@ -506,16 +523,16 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 入队失败不允许影响业务主流程
+                // A failed enqueue must not affect the main business flow.
             }
         }
 
         #endregion
 
-        #region 私有方法 —— 写线程
+        #region Private Methods - Writer Thread
 
         /// <summary>
-        /// 专职写日志线程 —— 循环取队列并落盘（2026-09-14 新增）
+        /// Dedicated log writer thread - loops over the queue and persists entries (added 2026-09-14).
         /// </summary>
         private void WriterLoop()
         {
@@ -545,7 +562,7 @@ namespace TcpServer.Common.Helpers
                 }
             }
 
-            // 关闭前把剩余日志全部写完
+            // Write out all remaining logs before closing.
             while (true)
             {
                 LogEntry left = null;
@@ -563,16 +580,16 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 单条日志落盘
+        /// Persists a single log entry.
         /// </summary>
-        /// <param name="entry">日志条目</param>
+        /// <param name="entry">Log entry.</param>
         private void WriteEntry(LogEntry entry)
         {
             if (entry == null) { return; }
 
             try
             {
-                // 写句柄可能被 Flush/CleanExpiredLogs 等其它线程访问，故统一加锁
+                // Write handles may be touched by other threads such as Flush / CleanExpiredLogs, so lock uniformly.
                 lock (_writerLock)
                 {
                     StreamWriter writer = GetWriter(entry.FilePath);
@@ -584,21 +601,23 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 文件日志写入失败时不允许抛出，避免影响业务
+                // A failed file log write must never be thrown, to avoid affecting the business flow.
             }
         }
 
         /// <summary>
-        /// 获取（或创建）指定日志文件的写句柄 —— 句柄复用，不再每行开关文件
-        /// 超过大小上限时先把当前文件滚动分卷，再新建句柄
+        /// Gets (or creates) the write handle for the specified log file - handles are reused, so files are
+        /// no longer opened and closed per line.
+        /// When the size cap is exceeded, the current file is rolled into a volume first and a new handle is created.
         /// </summary>
-        /// <param name="filePath">日志文件绝对路径</param>
-        /// <returns>写句柄；无法创建时返回 null</returns>
+        /// <param name="filePath">Absolute log file path.</param>
+        /// <returns>Write handle; null when it cannot be created.</returns>
         private StreamWriter GetWriter(string filePath)
         {
             if (_maxFileSize <= 0)
             {
-                // 同上：先落兜底值，避免配置读取异常回调本类导致递归
+                // As above: set the fallback first so a configuration read exception that calls back into this
+                // class cannot cause recursion.
                 _maxFileSize = AppConstants.LOG_MAX_FILE_SIZE;
 
                 long configured = ConfigHelper.LogMaxFileSize;
@@ -616,7 +635,7 @@ namespace TcpServer.Common.Helpers
                         return writer;
                     }
 
-                    // 超限：滚动分卷后重建句柄
+                    // Over the cap: roll into a new volume and rebuild the handle.
                     writer.Flush();
                     writer.Dispose();
                 }
@@ -654,9 +673,9 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 日志文件滚动分卷 —— abc.log → abc_1.log / abc_2.log（2026-09-14 新增）
+        /// Rolls a log file into a volume - abc.log -> abc_1.log / abc_2.log (added 2026-09-14).
         /// </summary>
-        /// <param name="filePath">当前日志文件绝对路径</param>
+        /// <param name="filePath">Absolute path of the current log file.</param>
         private void RollFile(string filePath)
         {
             try
@@ -682,12 +701,12 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 分卷失败时继续使用原文件，不允许影响日志写入
+                // When rolling fails, keep using the original file; log writing must not be affected.
             }
         }
 
         /// <summary>
-        /// 把全部写句柄的缓冲刷到磁盘（保留句柄，不关闭）
+        /// Flushes the buffers of all write handles to disk (handles are kept, not closed).
         /// </summary>
         private void FlushWriters()
         {
@@ -704,7 +723,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 关闭并清空全部写句柄
+        /// Closes and clears all write handles.
         /// </summary>
         private void CloseAllWriters()
         {
@@ -730,7 +749,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 进程退出回调 —— 落盘剩余日志（2026-09-14 新增）
+        /// Process exit callback - persists the remaining logs (added 2026-09-14).
         /// </summary>
         private void OnProcessExit(object sender, EventArgs e)
         {

@@ -8,20 +8,21 @@ using TcpServer.Model;
 namespace TcpServer.BLL
 {
     /// <summary>
-    /// 配置业务逻辑 —— UI 与 DAL 之间的唯一通道，负责配置的加载、保存与端口区间推导
+    /// Configuration business logic - the only channel between the UI and the DAL; responsible for
+    /// loading and saving the configuration and deriving the port range.
     /// </summary>
     public class ConfigBLL
     {
-        #region 字段
+        #region Fields
 
         private readonly IConfigRepository _repository;
 
         #endregion
 
-        #region 属性
+        #region Properties
 
         /// <summary>
-        /// 配置文件绝对路径
+        /// Absolute path of the configuration file.
         /// </summary>
         public string ConfigFilePath
         {
@@ -30,10 +31,10 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 构造函数
+        #region Constructors
 
         /// <summary>
-        /// 默认构造函数 —— 使用 JSON 文件仓储
+        /// Default constructor - uses the JSON file repository.
         /// </summary>
         public ConfigBLL()
             : this(new JsonConfigRepository())
@@ -41,9 +42,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 指定仓储的构造函数（便于后续切换存储介质与单元测试）
+        /// Constructor taking an explicit repository (eases a later switch of storage medium and unit testing).
         /// </summary>
-        /// <param name="repository">配置仓储实现，为 null 时使用默认 JSON 仓储</param>
+        /// <param name="repository">Configuration repository implementation; uses the default JSON repository when null.</param>
         public ConfigBLL(IConfigRepository repository)
         {
             _repository = repository ?? new JsonConfigRepository();
@@ -51,12 +52,13 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 对外方法
+        #region Public Methods
 
         /// <summary>
-        /// 读取配置 —— 失败时返回带默认值的空配置，绝不返回 null
+        /// Loads the configuration - returns an empty configuration with default values on failure;
+        /// null is never returned.
         /// </summary>
-        /// <returns>配置实体</returns>
+        /// <returns>Configuration entity.</returns>
         public AppConfigModel LoadConfig()
         {
             try
@@ -77,10 +79,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 保存配置
+        /// Saves the configuration.
         /// </summary>
-        /// <param name="config">待保存配置</param>
-        /// <returns>保存成功返回 true</returns>
+        /// <param name="config">Configuration to save.</param>
+        /// <returns>true when the save succeeded.</returns>
         public bool SaveConfig(AppConfigModel config)
         {
             if (config == null)
@@ -101,9 +103,9 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 备份当前配置文件
+        /// Backs up the current configuration file.
         /// </summary>
-        /// <returns>备份文件路径；失败时返回空串</returns>
+        /// <returns>Backup file path; an empty string on failure.</returns>
         public string BackupConfig()
         {
             try
@@ -118,13 +120,14 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 按"起始端口 + 数量"推导端口清单，并保留已有端口的备注与启用状态
+        /// Derives the port list from "start port + count", preserving the remark and enabled state
+        /// of ports that already existed.
         /// </summary>
-        /// <param name="startPort">起始端口</param>
-        /// <param name="count">端口数量</param>
-        /// <param name="existingPorts">已有端口清单，用于继承备注，可为 null</param>
-        /// <param name="errorMessage">失败原因</param>
-        /// <returns>端口清单，永不为 null（失败时返回空集合）</returns>
+        /// <param name="startPort">Start port.</param>
+        /// <param name="count">Number of ports.</param>
+        /// <param name="existingPorts">Existing port list used to inherit remarks; may be null.</param>
+        /// <param name="errorMessage">Failure reason.</param>
+        /// <returns>Port list, never null (an empty collection on failure).</returns>
         public List<PortConfig> BuildPortList(int startPort, int count,
             List<PortConfig> existingPorts, out string errorMessage)
         {
@@ -153,7 +156,7 @@ namespace TcpServer.BLL
                 return result;
             }
 
-            // 建立已有备注索引，便于继承
+            // Build an index of existing remarks so they can be inherited.
             Dictionary<int, PortConfig> existingMap = new Dictionary<int, PortConfig>();
             if (existingPorts != null)
             {
@@ -190,10 +193,10 @@ namespace TcpServer.BLL
         }
 
         /// <summary>
-        /// 检查端口清单中是否存在重复项
+        /// Checks the port list for duplicates.
         /// </summary>
-        /// <param name="ports">端口清单</param>
-        /// <returns>重复的端口清单，永不为 null</returns>
+        /// <param name="ports">Port list.</param>
+        /// <returns>List of duplicated ports, never null.</returns>
         public List<int> FindDuplicatedPorts(List<PortConfig> ports)
         {
             List<int> duplicated = new List<int>();
@@ -217,12 +220,12 @@ namespace TcpServer.BLL
 
         #endregion
 
-        #region 私有方法
+        #region Private Methods
 
         /// <summary>
-        /// 创建空配置
+        /// Creates an empty configuration.
         /// </summary>
-        /// <returns>带默认值的配置对象</returns>
+        /// <returns>Configuration object with default values.</returns>
         private AppConfigModel CreateEmptyConfig()
         {
             AppConfigModel config = new AppConfigModel();

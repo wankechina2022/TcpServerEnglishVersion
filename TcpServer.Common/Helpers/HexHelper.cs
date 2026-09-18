@@ -4,15 +4,15 @@ using System.Text;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 十六进制转换帮助类 —— 收发数据的 HEX 显示与解析统一走此类
+    /// Hexadecimal conversion helper - HEX display and parsing of sent / received data all go through this class.
     /// </summary>
     public static class HexHelper
     {
         /// <summary>
-        /// 字节数组转十六进制文本（形如 "4F 4B 0D 0A"）
+        /// Converts a byte array to hexadecimal text (formatted like "4F 4B 0D 0A").
         /// </summary>
-        /// <param name="data">字节数组，为 null 或空时返回空串</param>
-        /// <returns>十六进制文本</returns>
+        /// <param name="data">Byte array; returns an empty string when null or empty.</param>
+        /// <returns>Hexadecimal text.</returns>
         public static string BytesToHex(byte[] data)
         {
             if (data == null || data.Length == 0)
@@ -24,11 +24,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 字节数组转十六进制文本（指定有效长度）
+        /// Converts a byte array to hexadecimal text using an explicit effective length.
         /// </summary>
-        /// <param name="data">字节数组</param>
-        /// <param name="length">有效字节长度</param>
-        /// <returns>十六进制文本</returns>
+        /// <param name="data">Byte array.</param>
+        /// <param name="length">Effective byte length.</param>
+        /// <returns>Hexadecimal text.</returns>
         public static string BytesToHex(byte[] data, int length)
         {
             if (data == null || data.Length == 0 || length < 1)
@@ -52,10 +52,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 十六进制文本转字节数组 —— 支持 "4F4B"、"4F 4B"、"0x4F-0x4B" 等常见写法
+        /// Converts hexadecimal text to a byte array - supports common notations such as
+        /// "4F4B", "4F 4B" and "0x4F-0x4B".
         /// </summary>
-        /// <param name="hex">十六进制文本</param>
-        /// <returns>字节数组；无法解析时返回空数组</returns>
+        /// <param name="hex">Hexadecimal text.</param>
+        /// <returns>Byte array; an empty array when it cannot be parsed.</returns>
         public static byte[] HexToBytes(string hex)
         {
             if (string.IsNullOrWhiteSpace(hex))
@@ -65,7 +66,7 @@ namespace TcpServer.Common.Helpers
 
             try
             {
-                // 去掉 0x 前缀、空格、连字符、逗号等分隔符
+                // Strip the 0x prefix and separators such as spaces, hyphens and commas.
                 string clean = hex.Replace("0x", string.Empty)
                                   .Replace("0X", string.Empty)
                                   .Replace(" ", string.Empty)
@@ -80,7 +81,7 @@ namespace TcpServer.Common.Helpers
                     return new byte[0];
                 }
 
-                // 奇数长度时前面补 0，避免异常
+                // Pad with a leading 0 on odd length to avoid an exception.
                 if (clean.Length % 2 != 0)
                 {
                     clean = "0" + clean;
@@ -102,10 +103,10 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 判断文本是否为合法的十六进制串（允许空格与分隔符）
+        /// Determines whether the text is a valid hexadecimal string (spaces and separators are allowed).
         /// </summary>
-        /// <param name="hex">待校验文本</param>
-        /// <returns>合法返回 true</returns>
+        /// <param name="hex">Text to validate.</param>
+        /// <returns>true when valid.</returns>
         public static bool IsHexString(string hex)
         {
             if (string.IsNullOrWhiteSpace(hex))
@@ -143,11 +144,11 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 字节数组转可读文本（HEX 优先，用于日志）
+        /// Converts a byte array to readable text (HEX preferred, used for logging).
         /// </summary>
-        /// <param name="data">字节数组</param>
-        /// <param name="length">有效长度</param>
-        /// <returns>形如 "HEX(4) 4F 4B 0D 0A" 的文本</returns>
+        /// <param name="data">Byte array.</param>
+        /// <param name="length">Effective length.</param>
+        /// <returns>Text formatted like "HEX(4) 4F 4B 0D 0A".</returns>
         public static string ToLogText(byte[] data, int length)
         {
             if (data == null || data.Length == 0 || length < 1)

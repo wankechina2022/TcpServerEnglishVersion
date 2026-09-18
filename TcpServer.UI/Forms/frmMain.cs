@@ -11,36 +11,37 @@ using TcpServer.UI.Helpers;
 namespace TcpServer.UI.Forms
 {
     /// <summary>
-    /// 主窗体 —— 多端口 TCP 监听的控制台界面（端口管理、启停控制、配置持久化）
-    /// 数据控制台相关成员见 frmMain.Console.cs
+    /// Main window - the console UI for multi-port TCP listening (port management, start / stop
+    /// control, configuration persistence).
+    /// Members related to the data console live in frmMain.Console.cs.
     /// </summary>
     public partial class frmMain : Form
     {
         // ============================================================
-        // 1. 私有字段（按功能分组）
+        // 1. Private fields (grouped by function)
         // ============================================================
 
-        /// <summary>日志工具</summary>
+        /// <summary>Logging utility.</summary>
         private readonly LogHelper _logger = LogHelper.Instance;
 
-        /// <summary>配置业务对象</summary>
+        /// <summary>Configuration business object.</summary>
         private readonly ConfigBLL _configBll = new ConfigBLL();
 
-        /// <summary>多端口监听管理器</summary>
+        /// <summary>Multi-port listener manager.</summary>
         private TcpServerManager _serverManager;
 
-        /// <summary>当前配置</summary>
+        /// <summary>Current configuration.</summary>
         private AppConfigModel _config;
 
-        /// <summary>操作进行中标志 —— 防止按钮被重复点击</summary>
+        /// <summary>Operation-in-progress flag - prevents buttons from being clicked repeatedly.</summary>
         private bool _isBusy;
 
         // ============================================================
-        // 2. 构造函数
+        // 2. Constructor
         // ============================================================
 
         /// <summary>
-        /// 构造函数
+        /// Constructor.
         /// </summary>
         public frmMain()
         {
@@ -49,11 +50,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 3. 自定义初始化方法
+        // 3. Custom initialization methods
         // ============================================================
 
         /// <summary>
-        /// 自定义初始化 —— 绑定事件、加载配置、准备监听管理器
+        /// Custom initialization - binds events, loads the configuration and prepares the listener manager.
         /// </summary>
         private void InitializeCustomSettings()
         {
@@ -95,7 +96,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 绑定控件事件
+        /// Binds the control events.
         /// </summary>
         private void BindEvents()
         {
@@ -130,7 +131,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 初始化监听地址下拉框
+        /// Initializes the listen-address drop-down.
         /// </summary>
         private void InitializeListenIpComboBox()
         {
@@ -149,7 +150,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 将配置加载到界面
+        /// Loads the configuration into the UI.
         /// </summary>
         private void LoadConfigToUi()
         {
@@ -160,7 +161,7 @@ namespace TcpServer.UI.Forms
                 _config = new AppConfigModel();
             }
 
-            // 监听地址：若已有配置项不在下拉列表中则补进去
+            // Listen address: if the configured value is not in the drop-down yet, append it.
             if (!ValidationHelper.IsNullOrWhiteSpace(_config.ListenIp))
             {
                 if (!cboListenIp.Items.Contains(_config.ListenIp))
@@ -184,11 +185,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 4. 事件处理方法
+        // 4. Event handlers
         // ============================================================
 
         /// <summary>
-        /// 生成端口清单
+        /// Generates the port list.
         /// </summary>
         private void btnGenerate_Click(object sender, EventArgs e)
         {
@@ -196,7 +197,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 启动全部端口
+        /// Starts all ports.
         /// </summary>
         private void btnStartAll_Click(object sender, EventArgs e)
         {
@@ -204,7 +205,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 停止全部端口
+        /// Stops all ports.
         /// </summary>
         private void btnStopAll_Click(object sender, EventArgs e)
         {
@@ -212,7 +213,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 保存配置
+        /// Saves the configuration.
         /// </summary>
         private void btnSaveConfig_Click(object sender, EventArgs e)
         {
@@ -220,7 +221,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 打开日志目录
+        /// Opens the log folder.
         /// </summary>
         private void btnOpenLog_Click(object sender, EventArgs e)
         {
@@ -228,7 +229,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 端口列表选中行变化
+        /// Selected row in the port grid changed.
         /// </summary>
         private void dgvPorts_SelectionChanged(object sender, EventArgs e)
         {
@@ -236,7 +237,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 端口列表双击 —— 切换该端口的启动/停止
+        /// Double-click on the port grid - toggles start / stop for that port.
         /// </summary>
         private void dgvPorts_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -246,7 +247,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 监听地址变化 —— 仅在未监听时允许切换
+        /// Listen address changed - switching is only allowed while nothing is listening.
         /// </summary>
         private void cboListenIp_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -264,7 +265,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 定时刷新界面状态
+        /// Periodically refreshes the UI state.
         /// </summary>
         private void tmrRefresh_Tick(object sender, EventArgs e)
         {
@@ -272,7 +273,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 重新加载配置
+        /// Reloads the configuration.
         /// </summary>
         private void mnuReloadConfig_Click(object sender, EventArgs e)
         {
@@ -292,7 +293,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 打开配置目录
+        /// Opens the config folder.
         /// </summary>
         private void mnuOpenConfigDir_Click(object sender, EventArgs e)
         {
@@ -300,7 +301,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 退出程序
+        /// Exits the application.
         /// </summary>
         private void mnuExit_Click(object sender, EventArgs e)
         {
@@ -308,7 +309,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 应答规则管理
+        /// Reply rule management.
         /// </summary>
         private void mnuManageRule_Click(object sender, EventArgs e)
         {
@@ -327,7 +328,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 关于
+        /// About.
         /// </summary>
         private void mnuAbout_Click(object sender, EventArgs e)
         {
@@ -338,7 +339,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 窗体关闭 —— 保存配置并关闭全部监听
+        /// Form closing - saves the configuration and stops all listeners.
         /// </summary>
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -374,11 +375,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 5. 私有业务方法
+        // 5. Private business methods
         // ============================================================
 
         /// <summary>
-        /// 按起始端口与数量生成端口清单
+        /// Builds the port list from the start port and count.
         /// </summary>
         private void GeneratePortList()
         {
@@ -397,7 +398,7 @@ namespace TcpServer.UI.Forms
                 return;
             }
 
-            // 已监听的端口需要先停止才能重建清单
+            // Ports that are already listening must be stopped before the list can be rebuilt.
             if (_serverManager.ListeningCount > 0)
             {
                 if (!MessageHelper.ShowConfirm("Generating a new port list requires stopping all listening ports. Continue?"))
@@ -422,9 +423,9 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 启动全部端口
+        /// Starts all ports.
         /// </summary>
-        /// <param name="silent">静默模式（启动时自动监听，不弹确认）</param>
+        /// <param name="silent">Silent mode (auto-listen on launch, no confirmation dialog).</param>
         private void StartAllPorts(bool silent)
         {
             if (_isBusy) { return; }
@@ -480,7 +481,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 停止全部端口
+        /// Stops all ports.
         /// </summary>
         private void StopAllPorts()
         {
@@ -519,9 +520,9 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 按行切换端口启停
+        /// Toggles start / stop for one port by grid row.
         /// </summary>
-        /// <param name="rowIndex">行索引</param>
+        /// <param name="rowIndex">Row index.</param>
         private void TogglePortByRow(int rowIndex)
         {
             int port = PortGridHelper.GetRowPort(dgvPorts, rowIndex);
@@ -558,10 +559,10 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 保存配置到文件
+        /// Saves the configuration to file.
         /// </summary>
-        /// <param name="showTip">是否弹出成功提示</param>
-        /// <returns>保存成功返回 true</returns>
+        /// <param name="showTip">Whether to show a success prompt.</param>
+        /// <returns>True if the save succeeded.</returns>
         private bool SaveConfigToFile(bool showTip)
         {
             try
@@ -598,7 +599,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 将界面上的参数同步回配置对象
+        /// Synchronizes the UI parameters back into the configuration object.
         /// </summary>
         private void SyncConfigFromUi()
         {
@@ -618,9 +619,9 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 重建端口表格
+        /// Rebuilds the port grid.
         /// </summary>
-        /// <param name="ports">端口清单，可为 null</param>
+        /// <param name="ports">Port list; may be null.</param>
         private void RebuildPortGrid(List<PortConfig> ports)
         {
             PortGridHelper.Rebuild(dgvPorts, ports);
@@ -630,7 +631,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 刷新端口表格中的运行时数据
+        /// Refreshes the runtime data shown in the port grid.
         /// </summary>
         private void RefreshPortGrid()
         {
@@ -648,7 +649,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 刷新状态栏的监听统计
+        /// Refreshes the listening statistics in the status bar.
         /// </summary>
         private void RefreshListenStatus()
         {
@@ -679,7 +680,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 端口状态变化回调
+        /// Port state change callback.
         /// </summary>
         private void OnPortStateChanged(object sender, PortStateChangedEventArgs e)
         {
@@ -689,13 +690,13 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 6. 辅助方法
+        // 6. Helper methods
         // ============================================================
 
         /// <summary>
-        /// 在 UI 线程上安全执行操作
+        /// Executes an action safely on the UI thread.
         /// </summary>
-        /// <param name="action">待执行委托</param>
+        /// <param name="action">Delegate to execute.</param>
         private void InvokeSafely(MethodInvoker action)
         {
             if (action == null) { return; }
@@ -720,10 +721,10 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 打开指定目录（不存在时提示失败原因）
+        /// Opens the specified folder (reports the failure reason when it does not exist).
         /// </summary>
-        /// <param name="path">目录路径</param>
-        /// <param name="name">目录名称（用于提示）</param>
+        /// <param name="path">Folder path.</param>
+        /// <param name="name">Folder name (used in the message).</param>
         private void OpenDirectory(string path, string name)
         {
             string error;

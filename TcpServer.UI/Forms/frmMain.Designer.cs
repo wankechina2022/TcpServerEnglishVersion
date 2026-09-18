@@ -3,14 +3,14 @@
     partial class frmMain
     {
         /// <summary>
-        /// 必需的设计器变量
+        /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        /// 清理所有正在使用的资源
+        /// Cleans up all resources in use.
         /// </summary>
-        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false</param>
+        /// <param name="disposing">True to release managed resources; otherwise false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -20,7 +20,7 @@
                     components.Dispose();
                 }
 
-                // 释放业务对象（规约：非托管资源必须有释放代码）
+                // Dispose business objects (convention: every unmanaged resource must be released)
                 if (_serverManager != null)
                 {
                     _serverManager.Dispose();
@@ -31,10 +31,24 @@
             base.Dispose(disposing);
         }
 
-        #region Windows 窗体设计器生成的代码
+        #region Windows Form Designer generated code
+
+        // ----------------------------------------------------------------------------
+        // 2026-09-18 English edition - layout adjustments in this file:
+        //   mnuConfig      : width 62 -> 88
+        //   lblListenStatus: width 120 -> 140
+        //   lblVersion     : width 60 -> 70
+        //   chkAutoStart   : width 130 -> 144
+        //   lblStartPort   : width 62 -> 70
+        //   lblPortCount   : width 62 -> 74
+        //   lblSend        : width 40 -> 48
+        //   Top toolbar    : re-laid out as a whole.
+        // All sizes were widened because the English text is longer than the original Chinese;
+        // control text, name, z-order and tab order were not changed.
+        // ----------------------------------------------------------------------------
 
         /// <summary>
-        /// 设计器支持所需的方法 - 不要修改此方法的内容
+        /// Designer support method - do not modify the body of this method.
         /// </summary>
         private void InitializeComponent()
         {
@@ -126,7 +140,7 @@
             this.mnuSep1,
             this.mnuExit});
             this.mnuConfig.Name = "mnuConfig";
-            this.mnuConfig.Size = new System.Drawing.Size(62, 21);
+            this.mnuConfig.Size = new System.Drawing.Size(88, 21);
             this.mnuConfig.Text = "&Configuration";
             // 
             // mnuSaveConfig
@@ -224,47 +238,47 @@
             // 
             this.cboListenIp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboListenIp.FormattingEnabled = true;
-            this.cboListenIp.Location = new System.Drawing.Point(78, 12);
+            this.cboListenIp.Location = new System.Drawing.Point(80, 12);
             this.cboListenIp.Name = "cboListenIp";
-            this.cboListenIp.Size = new System.Drawing.Size(130, 25);
+            this.cboListenIp.Size = new System.Drawing.Size(120, 25);
             this.cboListenIp.TabIndex = 1;
             // 
             // lblStartPort
             // 
-            this.lblStartPort.Location = new System.Drawing.Point(220, 16);
+            this.lblStartPort.Location = new System.Drawing.Point(212, 16);
             this.lblStartPort.Name = "lblStartPort";
-            this.lblStartPort.Size = new System.Drawing.Size(62, 16);
+            this.lblStartPort.Size = new System.Drawing.Size(70, 16);
             this.lblStartPort.TabIndex = 2;
             this.lblStartPort.Text = "Start Port";
             this.lblStartPort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudStartPort
             // 
-            this.nudStartPort.Location = new System.Drawing.Point(286, 12);
+            this.nudStartPort.Location = new System.Drawing.Point(288, 12);
             this.nudStartPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
             this.nudStartPort.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             this.nudStartPort.Name = "nudStartPort";
-            this.nudStartPort.Size = new System.Drawing.Size(80, 25);
+            this.nudStartPort.Size = new System.Drawing.Size(72, 25);
             this.nudStartPort.TabIndex = 3;
             this.nudStartPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.nudStartPort.Value = new decimal(new int[] { 60000, 0, 0, 0 });
             // 
             // lblPortCount
             // 
-            this.lblPortCount.Location = new System.Drawing.Point(378, 16);
+            this.lblPortCount.Location = new System.Drawing.Point(372, 16);
             this.lblPortCount.Name = "lblPortCount";
-            this.lblPortCount.Size = new System.Drawing.Size(62, 16);
+            this.lblPortCount.Size = new System.Drawing.Size(74, 16);
             this.lblPortCount.TabIndex = 4;
             this.lblPortCount.Text = "Port Count";
             this.lblPortCount.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudPortCount
             // 
-            this.nudPortCount.Location = new System.Drawing.Point(444, 12);
+            this.nudPortCount.Location = new System.Drawing.Point(452, 12);
             this.nudPortCount.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
             this.nudPortCount.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             this.nudPortCount.Name = "nudPortCount";
-            this.nudPortCount.Size = new System.Drawing.Size(70, 25);
+            this.nudPortCount.Size = new System.Drawing.Size(64, 25);
             this.nudPortCount.TabIndex = 5;
             this.nudPortCount.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.nudPortCount.Value = new decimal(new int[] { 20, 0, 0, 0 });
@@ -273,23 +287,23 @@
             // 
             this.chkAutoStart.Location = new System.Drawing.Point(528, 15);
             this.chkAutoStart.Name = "chkAutoStart";
-            this.chkAutoStart.Size = new System.Drawing.Size(130, 21);
+            this.chkAutoStart.Size = new System.Drawing.Size(144, 21);
             this.chkAutoStart.TabIndex = 6;
             this.chkAutoStart.Text = "Auto-listen on startup";
             this.chkAutoStart.UseVisualStyleBackColor = true;
             // 
             // btnGenerate
             // 
-            this.btnGenerate.Location = new System.Drawing.Point(668, 10);
+            this.btnGenerate.Location = new System.Drawing.Point(684, 10);
             this.btnGenerate.Name = "btnGenerate";
-            this.btnGenerate.Size = new System.Drawing.Size(110, 29);
+            this.btnGenerate.Size = new System.Drawing.Size(108, 29);
             this.btnGenerate.TabIndex = 7;
             this.btnGenerate.Text = "Generate Ports";
             this.btnGenerate.UseVisualStyleBackColor = true;
             // 
             // btnStartAll
             // 
-            this.btnStartAll.Location = new System.Drawing.Point(786, 10);
+            this.btnStartAll.Location = new System.Drawing.Point(804, 10);
             this.btnStartAll.Name = "btnStartAll";
             this.btnStartAll.Size = new System.Drawing.Size(84, 29);
             this.btnStartAll.TabIndex = 8;
@@ -298,7 +312,7 @@
             // 
             // btnStopAll
             // 
-            this.btnStopAll.Location = new System.Drawing.Point(878, 10);
+            this.btnStopAll.Location = new System.Drawing.Point(900, 10);
             this.btnStopAll.Name = "btnStopAll";
             this.btnStopAll.Size = new System.Drawing.Size(84, 29);
             this.btnStopAll.TabIndex = 9;
@@ -307,7 +321,7 @@
             // 
             // btnSaveConfig
             // 
-            this.btnSaveConfig.Location = new System.Drawing.Point(970, 10);
+            this.btnSaveConfig.Location = new System.Drawing.Point(996, 10);
             this.btnSaveConfig.Name = "btnSaveConfig";
             this.btnSaveConfig.Size = new System.Drawing.Size(92, 29);
             this.btnSaveConfig.TabIndex = 10;
@@ -441,16 +455,16 @@
             // 
             this.lblSend.Location = new System.Drawing.Point(12, 13);
             this.lblSend.Name = "lblSend";
-            this.lblSend.Size = new System.Drawing.Size(40, 16);
+            this.lblSend.Size = new System.Drawing.Size(48, 16);
             this.lblSend.TabIndex = 0;
             this.lblSend.Text = "Send";
             this.lblSend.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtSend
             // 
-            this.txtSend.Location = new System.Drawing.Point(56, 9);
+            this.txtSend.Location = new System.Drawing.Point(64, 9);
             this.txtSend.Name = "txtSend";
-            this.txtSend.Size = new System.Drawing.Size(530, 25);
+            this.txtSend.Size = new System.Drawing.Size(522, 25);
             this.txtSend.TabIndex = 1;
             // 
             // chkSendHex
@@ -561,13 +575,13 @@
             // lblVersion
             // 
             this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(60, 17);
+            this.lblVersion.Size = new System.Drawing.Size(70, 17);
             this.lblVersion.Text = "Version";
             // 
             // lblListenStatus
             // 
             this.lblListenStatus.Name = "lblListenStatus";
-            this.lblListenStatus.Size = new System.Drawing.Size(120, 17);
+            this.lblListenStatus.Size = new System.Drawing.Size(140, 17);
             this.lblListenStatus.Text = "Listening ports: 0 / 0";
             // 
             // lblConfigPath

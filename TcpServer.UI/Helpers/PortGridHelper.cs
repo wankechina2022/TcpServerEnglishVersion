@@ -8,36 +8,36 @@ using TcpServer.Model;
 namespace TcpServer.UI.Helpers
 {
     /// <summary>
-    /// 端口表格帮助类 —— 收敛 DataGridView 的构建与刷新逻辑
+    /// Port grid helper - consolidates the DataGridView build and refresh logic.
     /// </summary>
     public static class PortGridHelper
     {
-        /// <summary>端口列名</summary>
+        /// <summary>Port column name.</summary>
         public const string COL_PORT = "colPort";
 
-        /// <summary>状态列名</summary>
+        /// <summary>State column name.</summary>
         public const string COL_STATE = "colState";
 
-        /// <summary>客户端数列名</summary>
+        /// <summary>Client count column name.</summary>
         public const string COL_CLIENTS = "colClients";
 
-        /// <summary>接收字节列名</summary>
+        /// <summary>Bytes received column name.</summary>
         public const string COL_RECEIVED = "colReceived";
 
-        /// <summary>发送字节列名</summary>
+        /// <summary>Bytes sent column name.</summary>
         public const string COL_SENT = "colSent";
 
-        /// <summary>最后活动列名</summary>
+        /// <summary>Last activity column name.</summary>
         public const string COL_LAST_ACTIVE = "colLastActive";
 
-        /// <summary>备注列名</summary>
+        /// <summary>Remark column name.</summary>
         public const string COL_REMARK = "colRemark";
 
         /// <summary>
-        /// 按端口清单重建表格
+        /// Rebuilds the grid from the port list.
         /// </summary>
-        /// <param name="dgv">目标表格，为 null 时直接返回</param>
-        /// <param name="ports">端口清单，可为 null</param>
+        /// <param name="dgv">Target grid; returns immediately when null.</param>
+        /// <param name="ports">Port list; may be null.</param>
         public static void Rebuild(DataGridView dgv, List<PortConfig> ports)
         {
             if (dgv == null) { return; }
@@ -69,10 +69,10 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 刷新表格中的运行时数据
+        /// Refreshes the runtime data in the grid.
         /// </summary>
-        /// <param name="dgv">目标表格，为 null 时直接返回</param>
-        /// <param name="infos">运行时状态集合，可为 null</param>
+        /// <param name="dgv">Target grid; returns immediately when null.</param>
+        /// <param name="infos">Runtime state collection; may be null.</param>
         public static void Refresh(DataGridView dgv, List<PortRuntimeInfo> infos)
         {
             if (dgv == null || dgv.Rows.Count == 0) { return; }
@@ -106,11 +106,11 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 获取指定行的端口号
+        /// Gets the port number of the specified row.
         /// </summary>
-        /// <param name="dgv">目标表格</param>
-        /// <param name="rowIndex">行索引</param>
-        /// <returns>端口号；无效时返回 0</returns>
+        /// <param name="dgv">Target grid.</param>
+        /// <param name="rowIndex">Row index.</param>
+        /// <returns>Port number; 0 when invalid.</returns>
         public static int GetRowPort(DataGridView dgv, int rowIndex)
         {
             if (dgv == null || rowIndex < 0 || rowIndex >= dgv.Rows.Count)
@@ -122,10 +122,10 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 获取当前选中行的端口号
+        /// Gets the port number of the currently selected row.
         /// </summary>
-        /// <param name="dgv">目标表格</param>
-        /// <returns>端口号；未选中时返回 0</returns>
+        /// <param name="dgv">Target grid.</param>
+        /// <returns>Port number; 0 when nothing is selected.</returns>
         public static int GetSelectedPort(DataGridView dgv)
         {
             if (dgv == null || dgv.SelectedRows.Count == 0)
@@ -138,11 +138,11 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 设置指定列的单元格值（列不存在时静默跳过）
+        /// Sets the cell value of the specified column (silently skipped when the column does not exist).
         /// </summary>
-        /// <param name="row">目标行</param>
-        /// <param name="columnName">列名</param>
-        /// <param name="value">单元格值</param>
+        /// <param name="row">Target row.</param>
+        /// <param name="columnName">Column name.</param>
+        /// <param name="value">Cell value.</param>
         private static void SetCell(DataGridViewRow row, string columnName, object value)
         {
             if (row == null || string.IsNullOrWhiteSpace(columnName)) { return; }
@@ -152,11 +152,11 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 读取指定列的单元格整数值
+        /// Reads the integer cell value of the specified column.
         /// </summary>
-        /// <param name="row">目标行</param>
-        /// <param name="columnName">列名</param>
-        /// <returns>单元格整数值；列不存在时返回 0</returns>
+        /// <param name="row">Target row.</param>
+        /// <param name="columnName">Column name.</param>
+        /// <returns>Integer cell value; 0 when the column does not exist.</returns>
         private static int GetCellInt(DataGridViewRow row, string columnName)
         {
             if (row == null || row.DataGridView == null) { return 0; }

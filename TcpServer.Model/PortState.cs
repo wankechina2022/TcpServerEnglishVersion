@@ -1,23 +1,23 @@
 ﻿namespace TcpServer.Model
 {
     /// <summary>
-    /// 端口运行状态枚举
+    /// Port runtime state enumeration.
     /// </summary>
     public enum PortState
     {
-        /// <summary>已停止（未监听）</summary>
+        /// <summary>Stopped (not listening)</summary>
         Stopped = 0,
 
-        /// <summary>正在启动</summary>
+        /// <summary>Starting up</summary>
         Starting = 1,
 
-        /// <summary>监听中</summary>
+        /// <summary>Listening</summary>
         Listening = 2,
 
-        /// <summary>正在停止</summary>
+        /// <summary>Stopping</summary>
         Stopping = 3,
 
-        /// <summary>启动失败（端口被占用等）</summary>
+        /// <summary>Start failed (port already in use, etc.)</summary>
         Faulted = 4
     }
 }

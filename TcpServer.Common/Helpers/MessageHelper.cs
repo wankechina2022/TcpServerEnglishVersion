@@ -3,14 +3,15 @@
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 消息提示帮助类 —— 统一 MessageBox 风格（规约要求：提示标题与图标一致）
+    /// Message prompt helper - unifies the MessageBox style
+    /// (convention: prompt title and icon must be consistent).
     /// </summary>
     public static class MessageHelper
     {
         /// <summary>
-        /// 显示信息提示
+        /// Shows an information prompt.
         /// </summary>
-        /// <param name="message">提示内容</param>
+        /// <param name="message">Prompt content.</param>
         public static void ShowInfo(string message)
         {
             MessageBox.Show(message ?? string.Empty, "Notice",
@@ -18,9 +19,9 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 显示警告提示
+        /// Shows a warning prompt.
         /// </summary>
-        /// <param name="message">警告内容</param>
+        /// <param name="message">Warning content.</param>
         public static void ShowWarning(string message)
         {
             MessageBox.Show(message ?? string.Empty, "Warning",
@@ -28,9 +29,9 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 显示错误提示
+        /// Shows an error prompt.
         /// </summary>
-        /// <param name="message">错误内容</param>
+        /// <param name="message">Error content.</param>
         public static void ShowError(string message)
         {
             MessageBox.Show(message ?? string.Empty, "Error",
@@ -38,10 +39,10 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 显示确认对话框
+        /// Shows a confirmation dialog.
         /// </summary>
-        /// <param name="message">确认内容</param>
-        /// <returns>用户选择"是"返回 true，否则返回 false</returns>
+        /// <param name="message">Confirmation content.</param>
+        /// <returns>true if the user chooses "Yes", otherwise false.</returns>
         public static bool ShowConfirm(string message)
         {
             return MessageBox.Show(message ?? string.Empty, "Confirm",
@@ -49,18 +50,18 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 显示操作成功提示
+        /// Shows an operation-succeeded prompt.
         /// </summary>
-        /// <param name="operation">操作名称</param>
+        /// <param name="operation">Operation name.</param>
         public static void ShowSuccess(string operation = "Operation")
         {
             ShowInfo(string.Format("{0} succeeded!", operation));
         }
 
         /// <summary>
-        /// 显示操作失败提示
+        /// Shows an operation-failed prompt.
         /// </summary>
-        /// <param name="operation">操作名称</param>
+        /// <param name="operation">Operation name.</param>
         public static void ShowFail(string operation = "Operation")
         {
             ShowError(string.Format("{0} failed. See the log for details!", operation));

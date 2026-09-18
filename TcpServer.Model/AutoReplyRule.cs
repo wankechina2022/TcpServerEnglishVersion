@@ -1,57 +1,57 @@
 ﻿namespace TcpServer.Model
 {
     /// <summary>
-    /// 自动应答规则实体 —— "收到什么就回什么"的模拟设备应答配置
+    /// Auto-reply rule entity - simulates a device that answers "reply with whatever was received".
     /// </summary>
     public class AutoReplyRule
     {
         /// <summary>
-        /// 规则名称 —— 便于在界面上识别
+        /// Rule name - makes the rule easy to identify in the UI.
         /// </summary>
         public string RuleName { get; set; }
 
         /// <summary>
-        /// 是否启用 —— 为 false 时该规则不参与匹配
+        /// Whether enabled - when false, this rule does not take part in matching.
         /// </summary>
         public bool Enabled { get; set; }
 
         /// <summary>
-        /// 匹配内容
+        /// Match content.
         /// </summary>
         public string MatchText { get; set; }
 
         /// <summary>
-        /// 匹配内容是否按十六进制解释（true 时 MatchText 形如 "4F 4B"）
+        /// Whether the match content is interpreted as hexadecimal (when true, MatchText looks like "4F 4B").
         /// </summary>
         public bool MatchAsHex { get; set; }
 
         /// <summary>
-        /// 是否要求完全匹配（false 表示包含即命中）
+        /// Whether an exact match is required (false means a containment match is enough).
         /// </summary>
         public bool MatchExactly { get; set; }
 
         /// <summary>
-        /// 应答内容
+        /// Reply content.
         /// </summary>
         public string ReplyText { get; set; }
 
         /// <summary>
-        /// 应答内容是否按十六进制解释
+        /// Whether the reply content is interpreted as hexadecimal.
         /// </summary>
         public bool ReplyAsHex { get; set; }
 
         /// <summary>
-        /// 应答延迟毫秒数（0 表示立即应答）
+        /// Reply delay in milliseconds (0 means reply immediately).
         /// </summary>
         public int DelayMs { get; set; }
 
         /// <summary>
-        /// 是否仅对指定端口生效（0 表示对所有端口生效）
+        /// Whether the rule applies to one specific port only (0 means all ports).
         /// </summary>
         public int OnlyForPort { get; set; }
 
         /// <summary>
-        /// 构造函数 —— 所有字段均提供默认值
+        /// Constructor - every field is initialized to a default value.
         /// </summary>
         public AutoReplyRule()
         {
@@ -67,9 +67,9 @@
         }
 
         /// <summary>
-        /// 返回便于日志输出的文本
+        /// Returns a text representation suitable for log output.
         /// </summary>
-        /// <returns>规则描述文本</returns>
+        /// <returns>Rule description text.</returns>
         public override string ToString()
         {
             return string.Format("{0} [{1}] {2} -> {3}",

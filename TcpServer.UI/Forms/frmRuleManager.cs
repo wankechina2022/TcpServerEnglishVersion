@@ -8,29 +8,30 @@ using TcpServer.Model;
 namespace TcpServer.UI.Forms
 {
     /// <summary>
-    /// 自动应答规则管理窗体 —— 以对话框方式编辑"收到什么就回什么"的规则清单
+    /// Auto-reply rule manager form - edits the "reply with whatever was received" rule list
+    /// as a dialog.
     /// </summary>
     public partial class frmRuleManager : Form
     {
         // ============================================================
-        // 1. 私有字段
+        // 1. Private fields
         // ============================================================
 
-        /// <summary>日志工具</summary>
+        /// <summary>Logging utility.</summary>
         private readonly LogHelper _logger = LogHelper.Instance;
 
-        /// <summary>供表格绑定的规则列表</summary>
+        /// <summary>Rule list bound to the grid.</summary>
         private BindingList<AutoReplyRule> _ruleList;
 
-        /// <summary>编辑结果（确定后由调用方取用）</summary>
+        /// <summary>Edit result (taken by the caller after OK).</summary>
         private List<AutoReplyRule> _rules;
 
         // ============================================================
-        // 2. 属性
+        // 2. Properties
         // ============================================================
 
         /// <summary>
-        /// 编辑后的规则清单 —— 仅在对话框返回"确定"时有效
+        /// The edited rule list - valid only when the dialog returned OK.
         /// </summary>
         public List<AutoReplyRule> Rules
         {
@@ -38,11 +39,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 3. 构造函数
+        // 3. Constructors
         // ============================================================
 
         /// <summary>
-        /// 无参构造函数 —— 供窗体设计器使用
+        /// Parameterless constructor - for the form designer.
         /// </summary>
         public frmRuleManager()
             : this(null)
@@ -50,9 +51,9 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 构造函数
+        /// Constructor.
         /// </summary>
-        /// <param name="rules">待编辑的规则清单，可为 null</param>
+        /// <param name="rules">Rule list to edit; may be null.</param>
         public frmRuleManager(List<AutoReplyRule> rules)
         {
             InitializeComponent();
@@ -60,18 +61,18 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 4. 自定义初始化
+        // 4. Custom initialization
         // ============================================================
 
         /// <summary>
-        /// 自定义初始化 —— 深拷贝入参并绑定表格
+        /// Custom initialization - deep-copies the argument and binds the grid.
         /// </summary>
-        /// <param name="rules">待编辑的规则清单</param>
+        /// <param name="rules">Rule list to edit.</param>
         private void InitializeCustomSettings(List<AutoReplyRule> rules)
         {
             try
             {
-                // 深拷贝，保证"取消"时不影响原配置
+                // Deep copy, so that "Cancel" does not affect the original configuration.
                 _rules = DeepCopy(rules);
                 _ruleList = new BindingList<AutoReplyRule>(_rules);
                 dgvRules.DataSource = _ruleList;
@@ -86,7 +87,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 绑定控件事件
+        /// Binds the control events.
         /// </summary>
         private void BindEvents()
         {
@@ -101,11 +102,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 5. 事件处理
+        // 5. Event handlers
         // ============================================================
 
         /// <summary>
-        /// 新增规则
+        /// Adds a rule.
         /// </summary>
         private void btnAdd_Click(object sender, EventArgs e)
         {
@@ -131,7 +132,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 删除规则
+        /// Deletes a rule.
         /// </summary>
         private void btnDelete_Click(object sender, EventArgs e)
         {
@@ -165,7 +166,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 规则上移
+        /// Moves a rule up.
         /// </summary>
         private void btnMoveUp_Click(object sender, EventArgs e)
         {
@@ -173,7 +174,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 规则下移
+        /// Moves a rule down.
         /// </summary>
         private void btnMoveDown_Click(object sender, EventArgs e)
         {
@@ -181,7 +182,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 确定 —— 校验并返回结果
+        /// OK - validates and returns the result.
         /// </summary>
         private void btnOk_Click(object sender, EventArgs e)
         {
@@ -209,7 +210,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 取消
+        /// Cancel.
         /// </summary>
         private void btnCancel_Click(object sender, EventArgs e)
         {
@@ -218,7 +219,7 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 表格数据错误 —— 防止输入非法值导致异常弹窗
+        /// Grid data error - prevents invalid input from raising an exception dialog.
         /// </summary>
         private void dgvRules_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
@@ -230,13 +231,13 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 6. 私有方法
+        // 6. Private methods
         // ============================================================
 
         /// <summary>
-        /// 移动规则位置
+        /// Moves a rule position.
         /// </summary>
-        /// <param name="offset">-1 上移，1 下移</param>
+        /// <param name="offset">-1 moves up, 1 moves down.</param>
         private void MoveRule(int offset)
         {
             try
@@ -272,10 +273,10 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 校验规则清单
+        /// Validates the rule list.
         /// </summary>
-        /// <param name="errorMessage">失败原因</param>
-        /// <returns>全部合法返回 true</returns>
+        /// <param name="errorMessage">Failure reason.</param>
+        /// <returns>true when everything is valid.</returns>
         private bool ValidateRules(out string errorMessage)
         {
             errorMessage = string.Empty;
@@ -338,10 +339,10 @@ namespace TcpServer.UI.Forms
         }
 
         /// <summary>
-        /// 深拷贝规则清单（保证取消编辑时不污染原配置）
+        /// Deep-copies the rule list (so cancelling an edit does not pollute the original configuration).
         /// </summary>
-        /// <param name="rules">源清单，可为 null</param>
-        /// <returns>拷贝出的新清单，永不为 null</returns>
+        /// <param name="rules">Source list; may be null.</param>
+        /// <returns>A new copied list, never null.</returns>
         private List<AutoReplyRule> DeepCopy(List<AutoReplyRule> rules)
         {
             List<AutoReplyRule> result = new List<AutoReplyRule>();

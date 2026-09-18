@@ -6,16 +6,17 @@ using System.Text;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 文件帮助类 —— 统一处理目录创建、读写与安全落盘
-    /// 规约要求：IO 操作先判断文件夹存不存在，不存在自动创建；非托管对象必须释放
+    /// File helper - centralizes directory creation, read / write and safe persistence.
+    /// Convention: for IO operations, check first whether the folder exists and create it when missing;
+    ///             unmanaged objects must be released.
     /// </summary>
     public static class FileHelper
     {
         /// <summary>
-        /// 确保目录存在（不存在则自动创建）
+        /// Ensures the directory exists (creates it when missing).
         /// </summary>
-        /// <param name="directoryPath">目录绝对路径</param>
-        /// <returns>目录可用返回 true</returns>
+        /// <param name="directoryPath">Absolute directory path.</param>
+        /// <returns>true when the directory is usable.</returns>
         public static bool EnsureDirectory(string directoryPath)
         {
             if (string.IsNullOrWhiteSpace(directoryPath))
@@ -40,10 +41,10 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 读取文本文件（文件不存在时返回空串，不抛异常）
+        /// Reads a text file (returns an empty string when the file is missing; never throws).
         /// </summary>
-        /// <param name="filePath">文件绝对路径</param>
-        /// <returns>文件内容；不存在或读取失败返回空串</returns>
+        /// <param name="filePath">Absolute file path.</param>
+        /// <returns>File content; an empty string when missing or when reading fails.</returns>
         public static string ReadAllTextSafe(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
@@ -63,11 +64,12 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 安全写入文本文件 —— 先写临时文件再替换，避免写入过程中断导致配置文件损坏
+        /// Safely writes a text file - writes a temporary file first and then replaces the target,
+        /// so an interrupted write cannot corrupt the configuration file.
         /// </summary>
-        /// <param name="filePath">目标文件绝对路径</param>
-        /// <param name="content">写入内容</param>
-        /// <returns>写入成功返回 true</returns>
+        /// <param name="filePath">Absolute target file path.</param>
+        /// <param name="content">Content to write.</param>
+        /// <returns>true when the write succeeded.</returns>
         public static bool WriteAllTextSafe(string filePath, string content)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -104,10 +106,10 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 安全删除文件（文件不存在时静默返回）
+        /// Safely deletes a file (silently returns when the file does not exist).
         /// </summary>
-        /// <param name="filePath">文件绝对路径</param>
-        /// <returns>删除成功或文件本就不存在返回 true</returns>
+        /// <param name="filePath">Absolute file path.</param>
+        /// <returns>true when the delete succeeded or the file never existed.</returns>
         public static bool SafeDelete(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -132,23 +134,25 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 备份文件 —— 备份前检查源文件与目标路径是否已存在（规约安全红线第 9 条）
+        /// Backs up a file - checks the source file and target path before backing up
+        /// (convention safety red-line item 9).
         /// </summary>
-        /// <param name="sourcePath">源文件绝对路径</param>
-        /// <returns>备份文件绝对路径；无需备份或失败时返回空串</returns>
+        /// <param name="sourcePath">Absolute source file path.</param>
+        /// <returns>Absolute backup file path; an empty string when no backup is needed or when it fails.</returns>
         public static string BackupFile(string sourcePath)
         {
             return BackupFile(sourcePath, ConfigHelper.ConfigBackupKeepCount);
         }
 
         /// <summary>
-        /// 备份文件并限制保留份数（2026-09-14 新增）
-        /// 说明：原实现按时间戳命名且从不清理，每次保存配置都留一份 .bak，
-        ///       长期运行会在 Config 目录累积上万个小文件，故增加保留上限。
+        /// Backs up a file with a retention cap (added 2026-09-14).
+        /// Note: the original implementation named backups by timestamp and never cleaned them up, leaving
+        ///       one .bak file per configuration save. Over a long uptime this accumulates tens of thousands
+        ///       of small files in the Config directory, so a retention cap was added.
         /// </summary>
-        /// <param name="sourcePath">源文件绝对路径</param>
-        /// <param name="keepCount">同名前缀备份的保留份数，小于 1 时使用默认值</param>
-        /// <returns>备份文件绝对路径；无需备份或失败时返回空串</returns>
+        /// <param name="sourcePath">Absolute source file path.</param>
+        /// <param name="keepCount">Number of backups to keep for the same name prefix; values below 1 use the default.</param>
+        /// <returns>Absolute backup file path; an empty string when no backup is needed or when it fails.</returns>
         public static string BackupFile(string sourcePath, int keepCount)
         {
             if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
@@ -165,7 +169,7 @@ namespace TcpServer.Common.Helpers
                 string backupPath = Path.Combine(directory ?? string.Empty,
                     string.Format("{0}_{1}{2}.bak", fileName, stamp, extension));
 
-                // 极端情况下同秒重复备份，追加序号避免覆盖
+                // Duplicate backups within the same second in an extreme case: append an index to avoid overwriting.
                 int index = 1;
                 while (File.Exists(backupPath))
                 {
@@ -177,7 +181,7 @@ namespace TcpServer.Common.Helpers
                 File.Copy(sourcePath, backupPath, false);
                 LogHelper.Instance.Info(string.Format("File backed up: {0} -> {1}", sourcePath, backupPath));
 
-                // 清理超量历史备份（失败不影响本次备份结果）
+                // Clean up excess historical backups (a failure does not affect this backup result).
                 CleanupExpiredBackups(directory, fileName, extension,
                     keepCount < 1 ? ConfigHelper.ConfigBackupKeepCount : keepCount);
 
@@ -191,13 +195,13 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 清理超量的历史备份文件，仅保留最近 N 份（2026-09-14 新增）
+        /// Cleans up excess historical backup files, keeping only the most recent N (added 2026-09-14).
         /// </summary>
-        /// <param name="directory">备份文件所在目录</param>
-        /// <param name="fileBaseName">源文件名（不含扩展名）</param>
-        /// <param name="extension">源文件扩展名</param>
-        /// <param name="keepCount">保留份数</param>
-        /// <returns>实际删除的文件数量</returns>
+        /// <param name="directory">Directory containing the backup files.</param>
+        /// <param name="fileBaseName">Source file name (without extension).</param>
+        /// <param name="extension">Source file extension.</param>
+        /// <param name="keepCount">Number of backups to keep.</param>
+        /// <returns>Number of files actually deleted.</returns>
         public static int CleanupExpiredBackups(string directory, string fileBaseName, string extension, int keepCount)
         {
             if (string.IsNullOrWhiteSpace(directory) || string.IsNullOrWhiteSpace(fileBaseName))
@@ -234,7 +238,8 @@ namespace TcpServer.Common.Helpers
                     catch (Exception) { }
                 }
 
-                // 按写入时间倒序（时间相同则按文件名倒序），保证保留的是最近的 keepCount 份
+                // Sort by write time descending (by file name descending when times are equal) so that
+                // the most recent keepCount files are the ones retained.
                 infos.Sort(delegate(FileInfo left, FileInfo right)
                 {
                     int result = right.LastWriteTime.CompareTo(left.LastWriteTime);
@@ -250,7 +255,7 @@ namespace TcpServer.Common.Helpers
                     }
                     catch (Exception)
                     {
-                        // 单个备份删除失败不影响其余清理
+                        // A single failed backup deletion does not affect the remaining cleanup.
                     }
                 }
 

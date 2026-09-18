@@ -4,12 +4,12 @@ using System.Threading;
 namespace TcpServer.Common.Helpers
 {
     /// <summary>
-    /// 单实例控制帮助类 —— 借助系统互斥体保证程序只能启动一次
-    /// 规约约定：窗体程序只能启动一次，不能二次启动
+    /// Single-instance control helper - relies on a system mutex to ensure the application starts only once.
+    /// Convention: a windowed application may only be started once; a second launch is not allowed.
     /// </summary>
     public sealed class SingleInstanceHelper : IDisposable
     {
-        #region 字段
+        #region Fields
 
         private Mutex _mutex;
         private bool _ownsMutex;
@@ -17,21 +17,21 @@ namespace TcpServer.Common.Helpers
 
         #endregion
 
-        #region 属性
+        #region Properties
 
         /// <summary>
-        /// 是否为当前首个实例（true 表示可以正常启动）
+        /// Whether this is the first instance (true means the application may start normally).
         /// </summary>
         public bool IsFirstInstance { get; private set; }
 
         #endregion
 
-        #region 构造与释放
+        #region Constructor and Dispose
 
         /// <summary>
-        /// 构造函数 —— 尝试获取全局互斥体
+        /// Constructor - attempts to acquire the global mutex.
         /// </summary>
-        /// <param name="mutexName">互斥体名称，默认使用全局常量</param>
+        /// <param name="mutexName">Mutex name; defaults to the global constant.</param>
         public SingleInstanceHelper(string mutexName)
         {
             IsFirstInstance = false;
@@ -48,13 +48,13 @@ namespace TcpServer.Common.Helpers
 
                 if (!createdNew)
                 {
-                    // 已有实例在运行，释放本次句柄避免资源泄漏
+                    // An instance is already running; release this handle to avoid a resource leak.
                     ReleaseMutexInternal();
                 }
             }
             catch (UnauthorizedAccessException ex)
             {
-                // 权限异常时不阻断启动，降级为允许运行
+                // Do not block startup on a permission exception; degrade to allowing the run.
                 LogHelper.Instance.Warn("Single-instance mutex creation was denied, running in degraded mode:" + ex.Message);
                 IsFirstInstance = true;
                 _mutex = null;
@@ -68,7 +68,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 默认构造函数 —— 使用全局互斥体名称
+        /// Default constructor - uses the global mutex name.
         /// </summary>
         public SingleInstanceHelper()
             : this(AppConstants.MUTEX_NAME)
@@ -76,7 +76,7 @@ namespace TcpServer.Common.Helpers
         }
 
         /// <summary>
-        /// 释放互斥体资源
+        /// Releases the mutex resources.
         /// </summary>
         public void Dispose()
         {
@@ -91,10 +91,10 @@ namespace TcpServer.Common.Helpers
 
         #endregion
 
-        #region 私有方法
+        #region Private Methods
 
         /// <summary>
-        /// 释放互斥体（内部调用，保证只释放一次且不抛异常）
+        /// Releases the mutex (called internally; guarantees a single release and never throws).
         /// </summary>
         private void ReleaseMutexInternal()
         {
@@ -113,7 +113,7 @@ namespace TcpServer.Common.Helpers
             }
             catch (Exception)
             {
-                // 释放失败不影响退出流程
+                // A failed release does not affect the shutdown flow.
             }
             finally
             {

@@ -6,16 +6,16 @@ using System.Windows.Forms;
 namespace TcpServer.UI.Helpers
 {
     /// <summary>
-    /// 界面通用帮助类 —— 收敛窗体中重复的界面操作代码
+    /// General UI helper - consolidates repeated UI operation code from the forms.
     /// </summary>
     public static class UiHelper
     {
         /// <summary>
-        /// 将数值限制在 NumericUpDown 的合法区间内
+        /// Clamps a value into the valid range of a NumericUpDown.
         /// </summary>
-        /// <param name="nud">数值控件，为 null 时原值返回</param>
-        /// <param name="value">目标值</param>
-        /// <returns>合法数值</returns>
+        /// <param name="nud">Numeric control; returns the original value when null.</param>
+        /// <param name="value">Target value.</param>
+        /// <returns>A valid numeric value.</returns>
         public static decimal ClampValue(NumericUpDown nud, int value)
         {
             if (nud == null)
@@ -29,11 +29,11 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 打开指定目录（不存在时自动创建）
+        /// Opens the specified directory (creating it automatically when missing).
         /// </summary>
-        /// <param name="path">目录绝对路径</param>
-        /// <param name="error">失败原因</param>
-        /// <returns>打开成功返回 true</returns>
+        /// <param name="path">Absolute directory path.</param>
+        /// <param name="error">Failure reason.</param>
+        /// <returns>true when it opened successfully.</returns>
         public static bool OpenDirectory(string path, out string error)
         {
             error = string.Empty;
@@ -62,11 +62,11 @@ namespace TcpServer.UI.Helpers
         }
 
         /// <summary>
-        /// 向多行文本框追加一行文本，并控制最大保留行数
+        /// Appends one line of text to a multi-line text box, capping the maximum number of retained lines.
         /// </summary>
-        /// <param name="box">目标文本框，为 null 时直接返回</param>
-        /// <param name="line">文本行</param>
-        /// <param name="maxLines">最大保留行数，小于 1 时不限制</param>
+        /// <param name="box">Target text box; returns immediately when null.</param>
+        /// <param name="line">Text line.</param>
+        /// <param name="maxLines">Maximum number of retained lines; values below 1 mean unlimited.</param>
         public static void AppendLine(RichTextBox box, string line, int maxLines)
         {
             if (box == null || string.IsNullOrEmpty(line))
@@ -95,7 +95,7 @@ namespace TcpServer.UI.Helpers
             }
             catch (Exception)
             {
-                // 界面文本追加失败不影响业务，静默忽略
+                // A failed UI text append does not affect the business flow; ignore it silently.
             }
         }
     }

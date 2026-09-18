@@ -3,14 +3,14 @@
     partial class frmRuleManager
     {
         /// <summary>
-        /// 必需的设计器变量
+        /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        /// 清理所有正在使用的资源
+        /// Cleans up all resources in use.
         /// </summary>
-        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false</param>
+        /// <param name="disposing">True to release managed resources; otherwise false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -21,10 +21,16 @@
             base.Dispose(disposing);
         }
 
-        #region Windows 窗体设计器生成的代码
+        #region Windows Form Designer generated code
+
+        // ----------------------------------------------------------------------------
+        // 2026-09-18 English edition - layout adjustments in this file:
+        //   btnMoveDown : width 80 -> 92 (the English caption "Move Down" needs the extra room)
+        // Control text, name, z-order and tab order were not changed.
+        // ----------------------------------------------------------------------------
 
         /// <summary>
-        /// 设计器支持所需的方法 - 不要修改此方法的内容
+        /// Designer support method - do not modify the body of this method.
         /// </summary>
         private void InitializeComponent()
         {
@@ -207,7 +213,7 @@
             // 
             this.btnMoveDown.Location = new System.Drawing.Point(276, 10);
             this.btnMoveDown.Name = "btnMoveDown";
-            this.btnMoveDown.Size = new System.Drawing.Size(80, 30);
+            this.btnMoveDown.Size = new System.Drawing.Size(92, 30);
             this.btnMoveDown.TabIndex = 3;
             this.btnMoveDown.Text = "Move Down";
             this.btnMoveDown.UseVisualStyleBackColor = true;

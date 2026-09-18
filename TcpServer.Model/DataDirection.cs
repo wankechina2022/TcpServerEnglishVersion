@@ -1,17 +1,17 @@
 ﻿namespace TcpServer.Model
 {
     /// <summary>
-    /// 数据方向枚举 —— 用于区分收发流水中的记录类型
+    /// Data direction enumeration - distinguishes record types in the send / receive traffic log.
     /// </summary>
     public enum DataDirection
     {
-        /// <summary>接收（来自客户端）</summary>
+        /// <summary>Received (from the client)</summary>
         Received = 0,
 
-        /// <summary>发送（发往客户端）</summary>
+        /// <summary>Sent (to the client)</summary>
         Sent = 1,
 
-        /// <summary>系统提示（连接建立、断开、错误等）</summary>
+        /// <summary>System notice (connection established, closed, error, etc.)</summary>
         System = 2
     }
 }

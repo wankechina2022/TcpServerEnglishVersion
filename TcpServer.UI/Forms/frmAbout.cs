@@ -6,23 +6,24 @@ using TcpServer.Common.Helpers;
 namespace TcpServer.UI.Forms
 {
     /// <summary>
-    /// 关于窗体 —— 展示版本号与关键路径（规约约定：主界面必须能确认版本）
+    /// About form - shows the version number and key paths
+    /// (convention: the main window must let the user confirm the version).
     /// </summary>
     public partial class frmAbout : Form
     {
         // ============================================================
-        // 1. 私有字段
+        // 1. Private fields
         // ============================================================
 
-        /// <summary>日志工具</summary>
+        /// <summary>Logging utility.</summary>
         private readonly LogHelper _logger = LogHelper.Instance;
 
         // ============================================================
-        // 2. 构造函数
+        // 2. Constructors
         // ============================================================
 
         /// <summary>
-        /// 构造函数
+        /// Constructor.
         /// </summary>
         public frmAbout()
         {
@@ -31,11 +32,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 3. 自定义初始化
+        // 3. Custom initialization
         // ============================================================
 
         /// <summary>
-        /// 自定义初始化 —— 填充版本与路径信息
+        /// Custom initialization - fills in the version and path information.
         /// </summary>
         private void InitializeCustomSettings()
         {
@@ -47,7 +48,7 @@ namespace TcpServer.UI.Forms
                     "Purpose: listen on multiple TCP ports at once and simulate a server receiving device data." + Environment.NewLine +
                     "Features: the port list and reply rules are saved automatically, so you do not need to re-enter them next time." + Environment.NewLine +
                     "Default start port " + AppConstants.DEFAULT_START_PORT +
-                    ", default listen address " + AppConstants.DEFAULT_LISTEN_IP + "。";
+                    ", default listen address " + AppConstants.DEFAULT_LISTEN_IP + ".";
 
                 lblPaths.Text = string.Format(
                     "App directory: {0}{1}Config file: {2}{1}Log directory: {3}",
@@ -66,11 +67,11 @@ namespace TcpServer.UI.Forms
         }
 
         // ============================================================
-        // 4. 事件处理
+        // 4. Event handlers
         // ============================================================
 
         /// <summary>
-        /// 关闭窗体
+        /// Closes the form.
         /// </summary>
         private void btnClose_Click(object sender, EventArgs e)
         {

@@ -7,17 +7,18 @@ using TcpServer.UI.Forms;
 namespace TcpServer.UI
 {
     /// <summary>
-    /// 程序入口 —— 负责全局异常兜底、单实例控制与主窗体启动
+    /// Application entry point - handles global exception fallback, single-instance control and
+    /// main window startup.
     /// </summary>
     internal static class Program
     {
         /// <summary>
-        /// 应用程序主入口点
+        /// Application main entry point.
         /// </summary>
         [STAThread]
         private static void Main()
         {
-            // 规约约定：窗体程序只能启动一次，不能二次启动
+            // Convention: a windowed application may only be started once; a second launch is not allowed.
             using (SingleInstanceHelper instance = new SingleInstanceHelper())
             {
                 if (!instance.IsFirstInstance)
@@ -27,7 +28,7 @@ namespace TcpServer.UI
                     return;
                 }
 
-                // 注册全局异常兜底（规约：UI 线程与非 UI 线程都要兜底）
+                // Register the global exception fallback (convention: cover both UI threads and non-UI threads).
                 Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
                 Application.ThreadException += Application_ThreadException;
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -35,9 +36,10 @@ namespace TcpServer.UI
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                // 清理超期日志（规约：默认保留 6 个月，超期自动删除）
-                // 2026-09-14 修改：这里只是"启动时清一次"；程序长期不关闭时由 LogHelper 的
-                // 专职清理线程按 App.config 的 LogCleanupIntervalHours（默认 24 小时）继续清理。
+                // Clean up expired logs (convention: 6 months retained by default, expired files deleted automatically).
+                // 2026-09-14 change: this only performs the "clean once at startup"; while the program stays up,
+                // LogHelper's dedicated cleanup thread keeps cleaning according to App.config's
+                // LogCleanupIntervalHours (24 hours by default).
                 try
                 {
                     int cleaned = LogHelper.Instance.CleanExpiredLogs(ConfigHelper.LogKeepMonths);
@@ -71,7 +73,7 @@ namespace TcpServer.UI
         }
 
         /// <summary>
-        /// UI 线程异常兜底
+        /// UI thread exception fallback.
         /// </summary>
         private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
@@ -83,7 +85,7 @@ namespace TcpServer.UI
         }
 
         /// <summary>
-        /// 非 UI 线程异常兜底
+        /// Non-UI thread exception fallback.
         /// </summary>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
